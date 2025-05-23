@@ -3,8 +3,7 @@ import login_screen as log
 import main_screen as msc
 import request as req
 import image as img
-
-
+import table as tbl
 
 sg.theme('LightGrey1')
 sg.theme_button_color(('black', 'gainsboro'))
@@ -56,24 +55,8 @@ def main():
 
                 window.hide()
             
-                try:
-                    result = req.api_request(api_key, api_choice)
-                    
-                    if not result or not isinstance(result, tuple) or len(result) != 2:
-                        raise ValueError("Unexpected response format from API.")
-
-                    headings, data = result
-
-                    if not headings or not isinstance(headings, list) or not all(isinstance(h, str) for h in headings):
-                        raise ValueError("Invalid or missing table headings.")
-
-                    if not data or not isinstance(data, list) or not all(isinstance(row, (list, tuple)) and len(row) == len(headings) for row in data):
-                        raise ValueError("Invalid or mismatched data rows.")
-
-                except Exception as e:
-                    sg.popup_error(f"Failed to fetch valid data from API:\n{str(e)}")
-                    window.un_hide()
-                    return
+                filename = f'./cryptodata/data.csv'
+                headings, data = tbl.read_csv(filename)
 
                 main_window = msc.main_screen(headings, data)
 
