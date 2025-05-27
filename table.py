@@ -12,6 +12,7 @@ def read_csv(filename):
     data = data[1:]
     return headings, data
 
+
 def export_to_csv(output, filename):
     with open(filename, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=output[0].keys())

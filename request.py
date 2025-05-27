@@ -1,8 +1,7 @@
-import csv
 from datetime import datetime, timedelta
-import requests
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+import requests
 import json
 import time
 import FreeSimpleGUI as sg
@@ -68,13 +67,13 @@ def api_request(api_key, api_choice):
                 # coin market cap
                 output.append({
                     # Table Information
-                    'Ranking': ranking,
+                    '#': ranking,
                     'Name': name,
                     'Current Price ('+currency+')': f"{price:,.2f}",
-                    '1h Volume': f"{volume_1h:,.2f}",
-                    '24h Volume': f"{volume_24h:,.2f}",
-                    '7d Volume': f"{volume_7d:,.2f}",
-                    'Market Cap': f"{market_cap}",
+                    '1h%': f"{volume_1h:,.2f}",
+                    '24h%': f"{volume_24h:,.2f}",
+                    '7d%': f"{volume_7d:,.2f}",
+                    'Market Cap ('+currency+')': f"{float(market_cap):,.2f}",
 
                     # Risk Assessment
                     'Logo': logo,
@@ -88,7 +87,7 @@ def api_request(api_key, api_choice):
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             filename = f'./cryptodata/crypto_extended_{timestamp}.csv'
             headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
-            return headings, data
+            return headings, data, filename
 
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             return sg.popup(f"Request failed: {e}")

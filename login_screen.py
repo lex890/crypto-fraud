@@ -12,7 +12,7 @@ def login_screen():
 
         [
             sg.Push(),
-            sg.InputText(key='-API-', size=(40, 1), font=('Helvetica', 12), tooltip='Enter API Key'),
+            sg.InputText(key='-API-', size=(40, 1), font=('Helvetica', 12), tooltip='Enter API Key', default_text='e28cbf9a-5c08-452e-8099-fa7f832262a3'),
             sg.Image(filename='./images/resizedCMC.png', size=(50, 50), enable_events=True, key='-CRYPTO-',),
             sg.Push()
         ],

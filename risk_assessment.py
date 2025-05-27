@@ -45,11 +45,19 @@ def risk_assessment_window(window, scores):
       if canvas_key == '-MAINSCORE-':
           fig = create_pie_chart(scores, figsize=(3, 3)) # big circle score
       else: 
-          fig = create_pie_chart(scores[i-1]) # 10 small lol
+          fig = create_pie_chart(scores[i-1]) # 10 small
 
       if canvas_key in window.AllKeysDict:
           draw_figure(window[canvas_key], fig)
 
+
+def update_risk_window(main_window, selected_row):
+    main_window['-LOGO-'].update(data=img.get_image(selected_row[7]), size=(100, 100))
+    main_window['-RANK-'].update(value=f'#{selected_row[0]}')
+    main_window['-NAME-'].update(value=selected_row[1])
+    main_window['-SYMB-'].update(value=selected_row[8])
+    main_window['-DATE-'].update(value=f'Date Added: {selected_row[10]}')
+    main_window['-DESC-'].update(value=f'Description: {selected_row[9]}')
 
 def score_window(data):
     # crypto icon/logo
@@ -59,28 +67,36 @@ def score_window(data):
         [
          sg.Text(f"#{data[0][0]}",              # crypto ranking
           font='Any 12 bold',
-          pad=((10, 0), 0),
+          pad=((10, 0), (13, 0)),
           text_color="#686868",
           key='-RANK-'),
 
          sg.Text(data[0][1],                    # crypto name
           font='Any 24 bold',
-          key='-NAME-'),
+          key='-NAME-',
+          pad=((5, 0), (20, 0))),
 
          sg.Text(data[0][8],                    # crypto symbol
           font='Any 12 bold', 
           text_color='#a1a3a6',
-          pad=((3, 0), (0, 5)),
-          key='-SYMB-') 
-        ],
+          pad=((3, 0), (20, 5)),
+          key='-SYMB-'),
 
+         sg.Push(),
+         sg.Text(f'Date Added: {data[0][10]}',  # date added
+          font='Any 12 bold', 
+          text_color='#a1a3a6',
+          pad=((0, 0), (0, 25)),
+          key='-DATE-')
+        ],
+        
         [sg.Text(f'Description: {data[0][9]}',  # crypto desc
-         background_color="#e9e9e9", 
+         background_color="#f2f2f2", 
          font=('Courier New', 12),   
-         size=(58, 12),
+         size=(50, 12),
          auto_size_text=False, 
          justification='left',
-         pad=((10, 10), (25, 10)),
+         pad=((40, 0), (15, 5)),
          key='-DESC-')]
     ]
     # donut graphs scores
@@ -94,7 +110,7 @@ def score_window(data):
     layout = [
         [
          sg.Column(logo, element_justification='center', vertical_alignment='top'),
-         sg.Column(info, element_justification='left', vertical_alignment='top'),
+         sg.Column(info, element_justification='left', vertical_alignment='top', size=(560, 306)),
          sg.Column(score, element_justification='center', vertical_alignment='top')
         ],
 

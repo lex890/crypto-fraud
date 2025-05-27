@@ -3,7 +3,7 @@ import risk_assessment as rsk
 
 scores = [8, 9, 7, 8, 9, 10, 9, 10, 9, 8] # assessment score
 
-def main_screen(headings, data):
+def main_screen(headings, data, file_path):
     
     layout = [
         #header and icon
@@ -25,7 +25,7 @@ def main_screen(headings, data):
                     size=(25, 1),
                     font=('Helvetica', 18),
                     pad=((250, 10), (75, 0)),
-                    key='-SEARCH-',
+                    key='-SEARCHBAR-',
                     tooltip='Search Cryptocurrency',
                     text_color='gray'
                 ),
@@ -35,7 +35,7 @@ def main_screen(headings, data):
                     image_size=(50, 50),
                     button_color=(sg.theme_background_color(), sg.theme_background_color()),
                     border_width=0,
-                    key='-SEARCH_BUTTON-',
+                    key='-SBUTTON-',
                     pad=((0, 25), (75, 0))
                 )
                 
@@ -48,11 +48,11 @@ def main_screen(headings, data):
                     max_col_width=10,
                     auto_size_columns=False,
                     justification='center',
-                    col_widths=[8, 10, 10, 10, 10, 10, 10],
+                    col_widths=[5, 12, 16, 6, 6, 6, 18],
                     num_rows=15,
                     key='-TABLE-',
                     row_height=51,
-                    font=('Helvetica', 12),
+                    font=('Helvetica', 12, 'bold'),
                     pad=((50, 0), (0, 0)),
                     hide_vertical_scroll=True,
                     enable_events=True
@@ -62,7 +62,7 @@ def main_screen(headings, data):
             
         ]
     ]
-    window = sg.Window('Main App', layout, modal=True, finalize=True, resizable=True)
+    window = sg.Window('Main App', layout, finalize=True, resizable=True)
     rsk.risk_assessment_window(window, scores)
     window.Maximize()
     
