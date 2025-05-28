@@ -98,23 +98,25 @@ def main():
                     # search button
                     if mw_event == '-SBUTTON-':
                         user_search = mw_values['-SEARCHBAR-']
-                        search_window = src.search_screen(user_search, file_path)
+
+                        if user_search == '':
+                            continue  
+
+                        search_window, key_to_data = src.search_screen(user_search, file_path)
                         
                         while True:
                             sw_event, sw_values = search_window.read()
 
-                            match = pattern.match(sw_event)
-                            if match:
-                                element_type = match.group(1)  # 'ICON' or 'NAME'
-                                index = int(match.group(2))    # '0', '1', etc.
-                                print(f'Clicked {element_type} at index {index}')
+                            if user_search == '' or sw_event in (sg.WIN_CLOSED, 'Exit'):
                                 search_window.close()
                                 break
-                                
 
-                            if sw_event in (sg.WIN_CLOSED, 'Exit'):
-                                search_window.close()
-                                break
+                            if isinstance(sw_event, str):
+                                match = pattern.match(sw_event)
+                                if match:
+                                    rsk.update_risk_window(main_window, key_to_data[sw_event])
+                                    search_window.close()
+                                    break
 
                     if mw_event in (sg.WIN_CLOSED, 'Exit'):
                         print('closing now')

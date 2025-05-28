@@ -21,8 +21,9 @@ def format_large_number(num):
         num = float(num.replace(',', ''))  # Remove commas and convert to float
     except (ValueError, AttributeError):
         return num  # Return as-is if not a number
-
-    if num >= 1_000_000_000:
+    if num >= 1_000_000_000_000:
+        return f"{int(num / 1_000_000_000_000)}T"
+    elif num >= 1_000_000_000:
         return f"{int(num / 1_000_000_000)}B"
     elif num >= 1_000_000:
         return f"{int(num / 1_000_000)}M"
@@ -37,7 +38,7 @@ def search_crypto(query, data, search_terms, threshold=60, limit=10):
     matches = process.extract(query, search_terms, limit=limit)
     seen = set()
     result_list = []
-
+    
     for match, score in matches:
         if score >= threshold:
             for row in data:
@@ -46,11 +47,17 @@ def search_crypto(query, data, search_terms, threshold=60, limit=10):
                     result_list.append((
                         row['#'],
                         row['Name'],
-                        row['Symbol'],
-                        row['Logo'],
-                        row['Market Cap (USD)'],
                         row['Current Price (USD)'],
-                        row['24h%']
+                        row['1h%'],
+                        row['24h%'],
+                        row['7d%'],
+                        row['Market Cap (USD)'],
+                        row['Logo'],
+                        row['Symbol'],
+                        row['Description'],
+                        row['Creation Date'],
+                        row['Website'],
+                        row['Source Code']
                     ))
 
     return result_list if result_list else "❌ No good match found."
@@ -63,9 +70,7 @@ def search_screen(user_search, file_path):
     csv_data = load_crypto_data(file_path)
     search_terms = get_search_terms(csv_data)
     result = search_crypto(user_search, csv_data, search_terms)
-    search_header, search_window = generate_results(result, user_search)
-
-    
+    search_header, search_window, key_to_data = generate_results(result, user_search)
 
     layout = [
         [
@@ -92,7 +97,7 @@ def search_screen(user_search, file_path):
         
     ]
 
-    return sg.Window('Search Result', layout, size=(850, 650))
+    return sg.Window('Search Result', layout, size=(850, 650)), key_to_data
 
 def generate_results(result, user_search):
     if not isinstance(result, list):  # Handle no results case
@@ -117,42 +122,121 @@ def generate_results(result, user_search):
         ]
     ]
 
-    list_tab = []
+    search_window = []
+    key_to_data = {}
 
     for index, item in enumerate(result):
+        
+        data_tuple = item
+
+        icon_key = f'-ICON{index+1}-'
+        name_key = f'-NAME{index+1}-'
+
+        key_to_data[icon_key] = data_tuple
+        key_to_data[name_key] = data_tuple
+
         image = [
-            [sg.Image(img.get_image(item[3]), size=(65, 65), background_color="#eaeaea", key=f'-ICON{index+1}-', enable_events=True)]
+            [
+                sg.Image(
+                    img.get_image(item[7]), 
+                    size=(65, 65), 
+                    background_color="#eaeaea", 
+                    key=f'-ICON{index+1}-', 
+                    enable_events=True
+                )
+            ]
         ]
 
         info = [
-            [sg.Button(f'{item[1]}', font=('League Spartan', 12, 'bold'), button_color="#eaeaea", border_width=0, key=f'-NAME{index+1}-'),
-             sg.Text(f'#{item[0]}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea", border_width=0, text_color='#919191') 
+             [
+                sg.Button(
+                    f'{item[1]}', 
+                    font=('League Spartan', 12, 'bold'), button_color="#eaeaea", 
+                    border_width=0, 
+                    key=f'-NAME{index+1}-',
+                    pad=(0, 0),
+                    enable_events=True
+                ),
+                sg.Text(
+                    f'#{item[0]}', 
+                    font=('League Spartan', 12, 'bold'), background_color="#eaeaea", 
+                    text_color='#919191',
+                    pad=(0, 0)
+                ) 
              ],
              [
                 sg.Text(
-                    f'{item[2]}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea", 
-                    pad=((8, 0), 0),
+                    f'{item[8]}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea", 
+                    pad=((2, 1), 0),
                     text_color='#919191')
              ]
         ]
 
         nums = [
-            [sg.Text(f'MCap: {format_large_number(item[4])}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea")],
-            [sg.Text(f'Vol(24h): ${format_large_number(item[6])}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea")]
+            [
+                sg.Text(
+                    'MCap: ', 
+                    font=('League Spartan', 12, 'bold'), background_color="#eaeaea",
+                    pad=(0, 0)
+                ),
+                sg.Text(
+                    f'{format_large_number(item[6])}', 
+                    font=('League Spartan', 12, 'bold'), text_color="#919191",
+                    background_color="#eaeaea",
+                    pad=(0, 0)
+                )
+            ],
+            [
+                sg.Text(
+                    'Vol(24h): ', 
+                    font=('League Spartan', 12, 'bold'), background_color="#eaeaea",
+                    pad=(0, 0)
+                ),
+                sg.Text(
+                    f'${format_large_number(item[4])}', 
+                    font=('League Spartan', 12, 'bold'), text_color="#919191",
+                    background_color="#eaeaea",
+                    pad=(0, 0)
+                )
+            ]
         ]
 
         price = [
-            [sg.Text(f'${item[5]}', font=('League Spartan', 12, 'bold'), background_color="#eaeaea")]
+            [
+                sg.Text(
+                    f'${item[2]}', 
+                    font=('League Spartan', 12, 'bold'), background_color="#eaeaea"
+                )
+            ]
         ]
 
         card = [
-            sg.Column(image, size=(80, 80), background_color="#eaeaea"),
-            sg.Column(info, size=(150, 60), background_color="#eaeaea"),
-            sg.Column(nums, size=(180, 60), background_color="#eaeaea"),
-            sg.Column(price, size=(120, 60), background_color="#eaeaea")
+            sg.Column(
+                image, 
+                size=(80, 80), 
+                background_color="#eaeaea"
+            ),
+            sg.Column(
+                info, 
+                size=(150, 60), 
+                background_color="#eaeaea",
+                pad=(0, (0, 10)),
+                expand_x=True
+            ),
+            sg.Column(
+                nums, 
+                size=(180, 60), 
+                background_color="#eaeaea",
+                pad=((20, 0), (0, 3))
+            ),
+            sg.Column(
+                price, 
+                size=(120, 60), 
+                background_color="#eaeaea"
+            )
         ]
 
-        list_tab.append([sg.Column(
+        search_window.append([sg.Column(
                 [card], 
                 size=(600, 85), 
                 background_color="#eaeaea", 
@@ -160,6 +244,4 @@ def generate_results(result, user_search):
             )
         ])
 
-    search_window = list_tab
-
-    return search_header, search_window
+    return search_header, search_window, key_to_data
