@@ -1,24 +1,24 @@
 import FreeSimpleGUI as sg
-import risk_assessment as rsk
+from . import risk_assessment as rsk
 
 scores = [8, 9, 7, 8, 9, 10, 9, 10, 9, 8] # assessment score
 
-def main_screen(headings, data, file_path):
+def main_screen(headings, data):
     
     layout = [
         #header and icon
         [
-            sg.Image(filename='./images/main.png', size=(17, 15), pad=((25, 0), (25, 0))), 
-            sg.Text('Crypto Fraud Detection Tool', font=('Helvetica', 16), pad=((15, 0), (25, 0))),
+            sg.Image(filename='./images/main.png', size=(17, 15), pad=((25, 0), (25, 0)), enable_events=True, key='-HEADERICON-'), 
+            sg.Text('Crypto Fraud Detection Tool', font=('Helvetica', 16), pad=((15, 0), (25, 0)), enable_events=True, key='-HEADER-'),
             sg.Push(),
             
         ],
         #search bar and bunch of buttons
         [
             [   
-                sg.Button('', image_filename='./images/byalphaR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((50, 0), (75, 0)), key=('-ALPHA-')),
-                sg.Button('', image_filename='./images/bynumberR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-NUMBER-')),
-                sg.Button('', image_filename='./images/bypriceR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-PRICE-')),
+                sg.Button('', image_filename='./images/byalphaR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((50, 0), (75, 0)), key=('-ALPHA-'), tooltip='Sort by Alpha'),
+                sg.Button('', image_filename='./images/bynumberR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-NUMBER-'), tooltip='Sort by Ranking(#)'),
+                sg.Button('', image_filename='./images/bypriceR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-PRICE-'), tooltip='Sort by Price($)'),
 
                 sg.InputText(
                     default_text='',

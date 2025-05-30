@@ -1,12 +1,10 @@
+import sys
+import os
 import FreeSimpleGUI as sg
-import login_screen as log
-import main_screen as msc
-import request as req
-import image as img
-import table as tbl
-import risk_assessment as rsk
-import search_screen as src
 import re
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import app
 
 sg.theme('LightGrey1')
 sg.theme_button_color(('black', 'gainsboro'))
@@ -21,7 +19,7 @@ current_image = {
 data = []
 
 def main():
-    login_window = log.login_screen() #should be login first "log.login_screen()"
+    login_window = app.login_screen() #should be login first "log.login_screen()"
 
     # Main event loop
     while True:
@@ -47,9 +45,9 @@ def main():
             api_choice = '1' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 2
             
             if (api_choice == '1'):
-                validity = req.is_valid_cmc_api_key(api_key)
+                validity = app.is_valid_cmc_api_key(api_key)
             else:
-                validity = req.is_valid_cg_api_key(api_key)
+                validity = app.is_valid_cg_api_key(api_key)
 
             if not validity: 
                 sg.popup('Please enter a valid API key.')
@@ -58,10 +56,10 @@ def main():
 
                 login_window.hide()
             
-                file_path = f'./cryptodata/dataa.csv'
-                headings, data = tbl.read_csv(file_path)
+                file_path = f'./data/data.csv'
+                headings, data = app.read_csv(file_path)
 
-                main_window = msc.main_screen(headings, data, file_path)
+                main_window = app.main_screen(headings, data)
 
                 print('Data fetched successfully')
                 # flags for buttons
@@ -73,13 +71,18 @@ def main():
                     print(mw_event)
 
                     if mw_event == '-TABLE-':
+                        print('im here')
                         selected_row_indices = mw_values['-TABLE-']
                         print(selected_row_indices)
-                        if selected_row_indices:  
+                        if selected_row_indices:
+                            print('im here')  
                             selected_index = selected_row_indices[0]
                             selected_row = data[selected_index]
-                            
-                            rsk.update_risk_window(main_window, selected_row)
+                            app.update_risk_window(main_window, selected_row)
+                    
+                    if mw_event in ('-HEADERICON-', 'HEADER'):
+                        main_window.close()
+                        break
 
                     # sorting buttons
                     if mw_event == '-NUMBER-': # sort by ascending/descending
@@ -102,10 +105,10 @@ def main():
                         if user_search == '':
                             continue  
 
-                        search_window, key_to_data = src.search_screen(user_search, file_path)
+                        search_window, key_to_data = app.search_screen(user_search, file_path)
                         
                         while True:
-                            sw_event, sw_values = search_window.read()
+                            sw_event, _ = search_window.read()
 
                             if user_search == '' or sw_event in (sg.WIN_CLOSED, 'Exit'):
                                 search_window.close()
@@ -114,7 +117,7 @@ def main():
                             if isinstance(sw_event, str):
                                 match = pattern.match(sw_event)
                                 if match:
-                                    rsk.update_risk_window(main_window, key_to_data[sw_event])
+                                    app.update_risk_window(main_window, key_to_data[sw_event])
                                     search_window.close()
                                     break
 
@@ -125,7 +128,7 @@ def main():
                 login_window.un_hide()
 
         elif lw_event == '-HELP-':
-            sg.popup('An API Key is a unique identifier used to authenticate a user or developer.')
+            sg.popup('Your API Key allows the app to access data from providers like CoinGecko or CoinMarketCap. Keep it private.')
 
     login_window.close()
 

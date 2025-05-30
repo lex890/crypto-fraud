@@ -8,7 +8,11 @@ def login_screen():
             sg.Text('Crypto Fraud Detection Tool', font=('Helvetica', 20), pad=(10, 30))
         ],
         
-        [sg.Text('API Key', font=('Helvetica', 12), pad=((180, 0), (50, 0)))],
+        [
+            sg.Text('API Key', font=('League Spartan', 12), pad=((180, 0), (50, 0))),
+            sg.Text('Select Currency', font=('Helvetica', 12), pad=((136, 0), (50, 0))),
+            sg.Combo(['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'PHP'], default_value='USD', key='-CURRENCY-', pad=((5, 0), (50, 0)), tooltip='Select Currency')
+        ],
 
         [
             sg.Push(),

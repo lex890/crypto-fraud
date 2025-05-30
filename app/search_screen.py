@@ -1,7 +1,7 @@
 import FreeSimpleGUI as sg
 from fuzzywuzzy import process
 import csv
-import image as img
+from . import get_images as img
 
 def load_crypto_data(csv_path):
     with open(csv_path, newline='', encoding='utf-8') as csvfile:
@@ -155,7 +155,8 @@ def generate_results(result, user_search):
                     border_width=0, 
                     key=f'-NAME{index+1}-',
                     pad=(0, 0),
-                    enable_events=True
+                    enable_events=True,
+                    tooltip=f'{item[1]}'
                 ),
                 sg.Text(
                     f'#{item[0]}', 

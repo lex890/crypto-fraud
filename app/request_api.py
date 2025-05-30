@@ -1,17 +1,18 @@
 from datetime import datetime, timedelta
-from requests import Request, Session
+from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import requests
-import json
 import time
 import FreeSimpleGUI as sg
-import table as tbl
+from . import table as tbl
+import json
+import csv
 
 cmc_listing_url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
 cmc_info_url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/info'
 
-def api_request(api_key, api_choice):
-    currency = 'USD' # get_currency(api_choice)
+def api_request(api_key, api_choice, currency_choice):
+    currency = currency_choice # get_currency(api_choice)
 
     if api_choice == '1':
         parameters = {
@@ -32,7 +33,6 @@ def api_request(api_key, api_choice):
             cmc_coins = cmc_listing_data.get('data', [])
 
             output = []
-            historical_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
 
             for coin in cmc_coins:
                 ranking = coin['cmc_rank']
@@ -85,45 +85,102 @@ def api_request(api_key, api_choice):
                 })
             # Save to CSV
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            filename = f'./cryptodata/crypto_extended_{timestamp}.csv'
+            filename = f'./data/crypto_extended_{timestamp}.csv'
             headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
+            print(headings, data, filename)
             return headings, data, filename
 
         except (ConnectionError, Timeout, TooManyRedirects) as e:
+            print('nuh uh')
             return sg.popup(f"Request failed: {e}")
         except KeyError as ke:
+            print(f'KeyError: {ke}')
+            import traceback
+            traceback.print_exc()
             return sg.popup(f"Response missing key: {ke}")
+    elif api_choice == '2':
+        apicheck = f'https://pro-api.coingecko.com/api/v3/ping?x_cg_pro_api_key={api_key}'
+        auth = requests.get(apicheck).json()
+        vs_currency = currency.lower()
+        historical_date = (datetime.now() - timedelta(days=30)).strftime('%d-%m-%Y')
+        cg_market_url = "https://api.coingecko.com/api/v3/coins/markets"
+        limit = 5
+        params = {
+            'vs_currency': vs_currency,
+            'order': 'market_cap_desc',
+            'per_page': limit,
+            'page': 1,
+            'sparkline': 'false'
+        }
+        market_data = requests.get(cg_market_url, params=params).json()
+        output = []
+        for coin in market_data:
+            coin_id = coin['id']
+            name = coin['name']
+            symbol = coin['symbol']
+            price = coin['current_price']
+            volume = coin['total_volume']
+
+            # Step 2: Get full metadata
+            cg_coin_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
+            cg_coin_info = requests.get(cg_coin_url).json()
+
+            description = cg_coin_info.get('description', {}).get('en', '').split('.')[0]
+            website = cg_coin_info.get('links', {}).get('homepage', [''])[0] or 'N/A'
+            source_code = cg_coin_info.get('links', {}).get('repos_url', {}).get('github', [''])[0] or 'N/A'
+            creation_date = cg_coin_info.get('genesis_date', 'N/A')
+
+            # Step 3: Historical price
+            hist_price = cg_get_historical_price(coin_id, historical_date, vs_currency)
+            time.sleep(1)  # prevent rate-limiting
+
+            output.append({
+                'Name': name,
+                'Symbol': symbol.upper(),
+                'Creation Date': creation_date,
+                f'Current Price ({vs_currency.upper()})': f"{price:,.2f}",
+                f'24h Volume ({vs_currency.upper()})': f"{volume:,.2f}",
+                f'Price on {historical_date} ({vs_currency.upper()})': f"{hist_price:,.2f}" if isinstance(hist_price, (float, int)) else hist_price,
+                'Description': description,
+                'Website': website,
+                'Source Code': source_code
+            })
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        filename = f'coingecko_crypto_data_{timestamp}.csv'
+        with open(filename, mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=output[0].keys())
+            writer.writeheader()
+            writer.writerows(output)
+
+        print(f"✅ Data saved to {filename}")
 
 def get_currency(apichoice):
     valid_currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'PHP']
     
     #return currency
 
-def is_valid_cmc_api_key(api_key): # check coin market api key validity
-    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
-    headers = {
-        "Accepts": "application/json",
-        "X-CMC_PRO_API_KEY": api_key,
-    }
-
-    response = requests.get(url, headers=headers)
-    
-    # If status_code is 200, the key is likely valid
-    if response.status_code == 200:
-        return True
-    else:
+def is_valid_cmc_api_key(api_key):
+    url = cmc_listing_url
+    try:
+        headers = {'X-CMC_PRO_API_KEY': api_key}
+        response = requests.get(url, headers=headers)
+        return response.status_code == 200
+    except Exception:
         return False
     
 def is_valid_cg_api_key(api_key):
-    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
-    headers = {
-        "Accepts": "application/json",
-        "X-CMC_PRO_API_KEY": api_key,
-    }
-
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        return True
-    else:
+    url = 'https://api.coingecko.com/api/v3/'
+    try:
+        response = requests.get(url)
+        return response.status_code == 200
+    except Exception:
         return False
+    
+def cg_get_historical_price(coin_id, date_str, currency):
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date_str}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        return data['market_data']['current_price'].get(currency, 'N/A')
+    except Exception:
+        return 'N/A'

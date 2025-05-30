@@ -1,8 +1,6 @@
-import FreeSimpleGUI as sg
 import requests
 from io import BytesIO
 from PIL import Image
-
 
 def get_image(url):
   response = requests.get(url)

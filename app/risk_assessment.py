@@ -1,6 +1,6 @@
 import FreeSimpleGUI as sg
 import matplotlib.pyplot as plt
-import image as img
+from . import get_images as img
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 sg.theme('LightGrey1')
@@ -18,9 +18,13 @@ def create_pie_chart(scores, figsize=(1.5, 1.5)):
     if (figsize == (3, 3)):
       value = round(sum(scores) / 10)
       remainder = 10 - value
+      fontsize_category = 12
+      fontsize_score = 40
     else:
       value = scores
       remainder = 10 - value 
+      fontsize_category = 8
+      fontsize_score = 12
 
     sizes = [value, remainder]
     fig, ax = plt.subplots(figsize=figsize, facecolor='none')
@@ -30,10 +34,10 @@ def create_pie_chart(scores, figsize=(1.5, 1.5)):
     centre_circle = plt.Circle((0, 0), 0.70, fc='white')
     ax.add_artist(centre_circle)
     # score in digit
-    ax.text(0, 0.1, f'{value}', ha='center', va='center', fontsize=24, weight='bold')
+    ax.text(0, 0.1, f'{value}', ha='center', va='center', fontsize=fontsize_score, weight='bold')
 
     # score category
-    ax.text(0, -0.30, 'Trustworthy', ha='center', va='center', fontsize=8)
+    ax.text(0, -0.30, 'Trustworthy', ha='center', va='center', fontsize=fontsize_category)
     ax.axis('equal')
     fig.tight_layout()
     return fig
@@ -90,8 +94,8 @@ def score_window(data):
           key='-DATE-')
         ],
         
-        [sg.Text(f'Description: {data[0][9]}',  # crypto desc
-         background_color="#f2f2f2", 
+        [sg.Text(f'{data[0][9]}',  # crypto desc
+         background_color="#fefefe", 
          font=('Courier New', 12),   
          size=(50, 12),
          auto_size_text=False, 
@@ -99,13 +103,15 @@ def score_window(data):
          pad=((40, 0), (15, 5)),
          key='-DESC-')]
     ]
+    assessment_criteria = ['Trading Volume Consistency', 'Liquidity & Order Book Depth', 'Token Age & Market History', 'Developer & Team Transparency', 'Smart Contract Audit & Security', 'Exchange Listings & Reputation', 'Community & Social Media Presence', 'Transaction Patterns & Anomalies', 'Whitepaper & Roadmap Execution', 'Regulatory Compliance & Legal Standing']
+
     # donut graphs scores
     assessment_score = [
-        sg.Canvas(key=f"-SCORE{i+1}-", background_color=sg.theme_background_color(), size=(150, 150), expand_y=True)
+        sg.Canvas(key=f"-SCORE{i+1}-", background_color=sg.theme_background_color(), size=(150, 150), expand_y=True, tooltip=assessment_criteria[i])
         for i in range(10)
     ]
 
-    score = [[sg.Canvas(key="-MAINSCORE-", background_color=sg.theme_background_color(), size=(300, 300))]]  # fix canvas space
+    score = [[sg.Canvas(key="-MAINSCORE-", background_color=sg.theme_background_color(), size=(300, 300), tooltip='Overall Assessment Score')]]  # fix canvas space
 
     layout = [
         [
