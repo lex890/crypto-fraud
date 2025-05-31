@@ -1,10 +1,7 @@
 import FreeSimpleGUI as sg
 from . import risk_assessment as rsk
 
-scores = [8, 9, 7, 8, 9, 10, 9, 10, 9, 8] # assessment score
-
 def main_screen(headings, data):
-    
     layout = [
         #header and icon
         [
@@ -57,13 +54,13 @@ def main_screen(headings, data):
                     hide_vertical_scroll=True,
                     enable_events=True
                 ),
-                sg.Column(rsk.score_window(data), background_color="#E6E6E6", expand_y=True, expand_x=True, pad=((50, 50), (42, 40)),)
+                sg.Column(rsk.score_window(data, headings), background_color="#E6E6E6", expand_y=True, expand_x=True, pad=((50, 50), (42, 40)),)
             ]
             
         ]
     ]
     window = sg.Window('Main App', layout, finalize=True, resizable=True)
-    rsk.risk_assessment_window(window, scores)
+    rsk.risk_assessment_window(window, data)
     window.Maximize()
     
     return window

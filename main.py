@@ -89,6 +89,7 @@ def main():
                             selected_index = selected_row_indices[0]
                             selected_row = data[selected_index]
                             app.update_risk_window(main_window, selected_row)
+                            app.risk_assessment_window(main_window, data)
 
                     if mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()

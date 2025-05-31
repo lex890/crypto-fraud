@@ -3,7 +3,7 @@ import os
 import FreeSimpleGUI as sg
 import re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+import matplotlib.pyplot as plt
 import app
 
 sg.theme('LightGrey1')
@@ -75,14 +75,11 @@ def main():
                         selected_row_indices = mw_values['-TABLE-']
                         print(selected_row_indices)
                         if selected_row_indices:
-                            print('im here')  
                             selected_index = selected_row_indices[0]
                             selected_row = data[selected_index]
+                            current_row = int(selected_row[0]) - 1
                             app.update_risk_window(main_window, selected_row)
-                    
-                    if mw_event in ('-HEADERICON-', 'HEADER'):
-                        main_window.close()
-                        break
+                            app.risk_assessment_window(main_window, data, current_row)
 
                     # sorting buttons
                     if mw_event == '-NUMBER-': # sort by ascending/descending
