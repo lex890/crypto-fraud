@@ -26,57 +26,55 @@ def draw_figure(canvas_elem, figure, key, data_for_chart, is_main_score=False):
     score_data_for_canvas[key] = {'data': data_for_chart, 'is_main': is_main_score}
 
     def on_click(event, canvas_key=key):
-        if canvas_key == '-SCORE1-':
-            sg.popup("Trading Volume Consistency",
-                    "Checks if trading volume is stable over time.\n"
-                    "Sudden unexplained spikes or drops may indicate manipulation.")
-                    
-        elif canvas_key == '-SCORE2-':
-            sg.popup("Liquidity & Order Book Depth",
-                    "Evaluates how easily tokens can be bought or sold without affecting the price.\n"
-                    "Thin order books are common in scams or pump-and-dump schemes.")
-                    
-        elif canvas_key == '-SCORE3-':
-            sg.popup("Token Age & Market History",
-                    "Older tokens with long-term trading history are generally more trustworthy.\n"
-                    "Recently launched tokens may be more prone to fraud.")
-                    
-        elif canvas_key == '-SCORE4-':
-            sg.popup("Developer & Team Transparency",
-                    "Assesses the public presence and credibility of the developers.\n"
-                    "Anonymous or unverifiable teams are considered high risk.")
-                    
-        elif canvas_key == '-SCORE5-':
-            sg.popup("Smart Contract Audit & Security",
-                    "Checks if the token's smart contract has undergone third-party audits.\n"
-                    "Unaudited or poorly written contracts may be vulnerable to exploits.")
-                    
-        elif canvas_key == '-SCORE6-':
-            sg.popup("Exchange Listings & Reputation",
-                    "Verifies if the token is listed on reputable exchanges.\n"
-                    "Listing on major exchanges often indicates vetting and legitimacy.")
-                    
-        elif canvas_key == '-SCORE7-':
-            sg.popup("Community & Social Media Presence",
-                    "Analyzes activity on platforms like Twitter, Reddit, and Telegram.\n"
-                    "Organic engagement suggests community trust and interest.")
-                    
-        elif canvas_key == '-SCORE8-':
-            sg.popup("Transaction Patterns & Anomalies",
-                    "Looks for suspicious patterns like repetitive large transfers,\n"
-                    "wallet clustering, or sudden inactivity — common in scams.")
-                    
-        elif canvas_key == '-SCORE9-':
-            sg.popup("Whitepaper & Roadmap Execution",
-                    "Evaluates the quality and realism of the project's whitepaper and roadmap.\n"
-                    "Empty buzzwords or no progress suggest a potential scam.")
-                    
-        elif canvas_key == '-SCORE10-':
-            sg.popup("Regulatory Compliance & Legal Standing",
-                    "Checks for known legal issues or warnings from authorities.\n"
-                    "Projects compliant with regulations are generally safer.")
+        descriptions = {
+            '-SCORE1-': ("Trading Volume Consistency", 
+                        "Checks if trading volume is stable over time.\n"
+                        "Sudden unexplained spikes or drops may indicate manipulation."),
+            '-SCORE2-': ("Liquidity & Order Book Depth", 
+                        "Evaluates how easily tokens can be bought or sold without affecting the price.\n"
+                        "Thin order books are common in scams or pump-and-dump schemes."),
+            '-SCORE3-': ("Token Age & Market History", 
+                        "Older tokens with long-term trading history are generally more trustworthy.\n"
+                        "Recently launched tokens may be more prone to fraud."),
+            '-SCORE4-': ("Developer & Team Transparency", 
+                        "Assesses the public presence and credibility of the developers.\n"
+                        "Anonymous or unverifiable teams are considered high risk."),
+            '-SCORE5-': ("Smart Contract Audit & Security", 
+                        "Checks if the token's smart contract has undergone third-party audits.\n"
+                        "Unaudited or poorly written contracts may be vulnerable to exploits."),
+            '-SCORE6-': ("Exchange Listings & Reputation", 
+                        "Verifies if the token is listed on reputable exchanges.\n"
+                        "Listing on major exchanges often indicates vetting and legitimacy."),
+            '-SCORE7-': ("Community & Social Media Presence", 
+                        "Analyzes activity on platforms like Twitter, Reddit, and Telegram.\n"
+                        "Organic engagement suggests community trust and interest."),
+            '-SCORE8-': ("Transaction Patterns & Anomalies", 
+                        "Looks for suspicious patterns like repetitive large transfers,\n"
+                        "wallet clustering, or sudden inactivity — common in scams."),
+            '-SCORE9-': ("Whitepaper & Roadmap Execution", 
+                        "Evaluates the quality and realism of the project's whitepaper and roadmap.\n"
+                        "Empty buzzwords or no progress suggest a potential scam."),
+            '-SCORE10-': ("Regulatory Compliance & Legal Standing", 
+                        "Checks for known legal issues or warnings from authorities.\n"
+                        "Projects compliant with regulations are generally safer."),
+        }
 
-        
+        if canvas_key in descriptions:
+            title, message = descriptions[canvas_key]
+            sg.popup(title, message, title=title, font=("Helvetica", 12), keep_on_top=True)
+
+        elif canvas_key == '-MAINSCORE-':
+            sg.Window(
+                "Risk Score Guide",
+                [
+                    [sg.Text("Score Interpretation", font=("Helvetica", 14, "bold"))],
+                    [sg.Text("1 - 3   : High-Risk/Fraudulent (Avoid)", text_color="red", font=("Helvetica", 10, "bold"))],
+                    [sg.Text("4 - 6   : Medium Risk (Caution)", text_color="orange", font=("Helvetica", 10, "bold"))],
+                    [sg.Text("7 - 10  : Trustworthy (Safe to interact with)", text_color="green", font=("Helvetica", 10, "bold"))],
+                    [sg.Button("OK", size=(10, 1))]
+                ],
+                modal=True, keep_on_top=True
+            ).read(close=True)
 
     widget.bind("<Button-1>", on_click)
 
@@ -109,17 +107,15 @@ def create_pie_chart(score_data, figsize=(1.75, 1.75)):
 
     remainder = 10 - value
     if 8 <= value <= 10:
-        category = "Trustworthy"
+        category = "Safe"
         color = "#07DB07"
-    elif 6 <= value <= 7:
-        category = "Moderate"
-        color = "#DBB407"
-    elif 4 <= value <= 5:
-        category = "Questionable"
+    elif 4 <= value <= 7:
+        category = "Caution"
         color = "#DB6D07"
-    else:
-        category = "Untrustworthy"
+    elif 1 <= value <= 3:
+        category = "Avoid"
         color = "#DB3807"
+        
 
     sizes = [value, remainder]
     fig, ax = plt.subplots(figsize=figsize, facecolor='none')
@@ -208,8 +204,9 @@ def score_window(data, headings):
     ]
     assessment_criteria = headings[13:23]
     print(assessment_criteria)
-    # donut graphs scores
+    
     assessment_score = [
+        # donut graphs scores
         sg.Canvas(key=f"-SCORE{i+1}-", background_color=sg.theme_background_color(), size=(150, 150), expand_y=True, tooltip=assessment_criteria[i])
         for i in range(10)
     ]

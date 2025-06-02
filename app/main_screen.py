@@ -21,7 +21,7 @@ def main_screen(headings, data):
                     default_text='',
                     size=(25, 1),
                     font=('Helvetica', 18),
-                    pad=((250, 10), (75, 0)),
+                    pad=((200, 10), (75, 0)),
                     key='-SEARCHBAR-',
                     tooltip='Search Cryptocurrency',
                     text_color='gray'

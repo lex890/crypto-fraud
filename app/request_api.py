@@ -17,7 +17,7 @@ def api_request(api_key, api_choice, currency_choice):
     if api_choice == '1':
         parameters = {
             'start':'1',
-            'limit':'50',
+            'limit':'10',
             'convert': currency
         }
         headers = {
@@ -48,6 +48,12 @@ def api_request(api_key, api_choice, currency_choice):
                 coin_id = coin['id']
                 info_response = session.get(cmc_info_url, params={'id': coin_id})
                 info_data = info_response.json()
+
+                if 'data' not in info_data:
+                    print(f"❌ No 'data' in response for coin ID {coin_id}")
+                    print("🔎 Full response:", info_data)
+                    continue  # Skip this coin
+
                 coin_info = info_data['data'].get(str(coin_id), {})
 
                 date_added = coin_info.get('date_added', 'N/A')

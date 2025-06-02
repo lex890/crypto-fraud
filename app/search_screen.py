@@ -60,7 +60,7 @@ def search_crypto(query, data, search_terms, threshold=60, limit=10):
                         row['Source Code']
                     ))
 
-    return result_list if result_list else "❌ No good match found."
+    return result_list if result_list else "No good match found."
 
 
 def search_screen(user_search, file_path):
@@ -72,17 +72,17 @@ def search_screen(user_search, file_path):
     result = search_crypto(user_search, csv_data, search_terms)
     search_header, search_window, key_to_data = generate_results(result, user_search)
 
-    layout = [
-        [
+    if key_to_data:
+        result_header = [
             sg.Column(
                 search_header, 
-                size=(650, 100),
+                size=(950, 100),
                 background_color=sg.theme_background_color(),
                 pad=((25, 0), (35, 0))
             ),
             sg.Push()
-        ],
-        [
+        ]
+        result_container = [
             sg.Push(),
             sg.Column(
                 search_window, 
@@ -94,36 +94,105 @@ def search_screen(user_search, file_path):
             ),
             sg.Push()
         ]
-        
+    else:
+        result_header = [
+            sg.Column(
+                search_header, 
+                size=(950, 100),
+                background_color=sg.theme_background_color(),
+                pad=((25, 0), (35, 0)),
+            ),
+            sg.Push()
+        ]
+        result_container = [
+            sg.Push(),
+            sg.Column(
+                search_window, 
+                size=(650, 800), 
+                background_color="#dadada", 
+                justification='center',
+                pad=(0, (0, 45))
+            ),
+            sg.Push()
+        ]
+
+    layout = [
+        result_header,
+        result_container
     ]
 
     return sg.Window('Search Result', layout, size=(850, 650)), key_to_data
 
 def generate_results(result, user_search):
-    if not isinstance(result, list):  # Handle no results case
-        return [[sg.Text(result, font=('Helvetica', 14), text_color='red')]], [[sg.Text("Try a different search term.", font=('Helvetica', 12))]]
 
-    search_header = [
-        [
-            sg.Button(
-                '',
-                image_filename='./images/searchSZ.png',
-                image_size=(35, 35),
-                button_color=(sg.theme_background_color(), sg.theme_background_color()),
-                border_width=0,
-                key='-SBUTTON-',
-                pad=((0, 15), 0)
-            ),
-            sg.Text(
-                f'Search: {user_search}', 
-                font=('Helvetica', 16),
-                text_color='#d1d1d1'
-            )
-        ]
-    ]
-
+    search_header = []
     search_window = []
     key_to_data = {}
+
+    if not isinstance(result, list):  # Handle no results case
+        # Show an image on a Canvas
+        search_header = [
+            [
+                sg.Button(
+                    '',
+                    image_filename='./images/searchSZ.png',
+                    image_size=(35, 35),
+                    button_color=(sg.theme_background_color(), sg.theme_background_color()),
+                    border_width=0,
+                    key='-SBUTTON-',
+                    pad=((0, 15), 0)
+                ),
+                sg.Text(
+                    f'No Results for: {user_search}', 
+                    font=('印品鸿蒙体', 16),
+                    text_color="#aaa8a8"
+                ),
+                sg.Button(
+                    '',
+                    image_filename='./images/closeNR.png',
+                    image_size=(35, 35),
+                    button_color=(sg.theme_background_color(), sg.theme_background_color()),
+                    border_width=0,
+                    key='-CBUTTON-',
+                    pad=((450, 0), (0, 50))
+                )
+            ]
+        ]
+        image_elem = sg.Image(filename='./images/no_result_found.png', key='-NORESULTIMG-', background_color="#dadada")
+        canvas_frame = sg.Column([[image_elem]], background_color="#dadada", pad=((185, 0), (125, 0)),)
+        canvas_message = sg.Text("It's Not Here...", font=('印品鸿蒙体', 20), background_color="#dadada", pad=((215, 0), (0, 0)), text_color="#838383")
+        search_window = [[canvas_frame], [canvas_message]]
+        return search_header, search_window, key_to_data
+    else:
+        search_header = [
+            [
+                sg.Button(
+                    '',
+                    image_filename='./images/searchSZ.png',
+                    image_size=(35, 35),
+                    button_color=(sg.theme_background_color(), sg.theme_background_color()),
+                    border_width=0,
+                    key='-SBUTTON-',
+                    pad=((0, 15), 0)
+                ),
+                sg.Text(
+                    f'Search: {user_search}', 
+                    font=('印品鸿蒙体', 16),
+                    text_color="#aaa8a8"
+                ),
+                sg.Button(
+                    '',
+                    image_filename='./images/closeNR.png',
+                    image_size=(35, 35),
+                    button_color=(sg.theme_background_color(), sg.theme_background_color()),
+                    border_width=0,
+                    key='-CBUTTON-',
+                    pad=((550, 0), (0, 50))
+                )
+            ]
+        ]
+
+
 
     for index, item in enumerate(result):
         

@@ -55,6 +55,7 @@ def main():
 
                 login_window.hide()
             
+                '''
                 try:
                     result = app.api_request(api_key, api_choice, currency_choice)
                     
@@ -73,7 +74,11 @@ def main():
                 except Exception as e:
                     sg.popup_error(f"Failed to fetch valid data from API:\n{str(e)}")
                     login_window.un_hide()
-                    return
+                    return                
+                '''
+
+                file_path = f'./data/data.csv' # temp way to access csv
+                headings, data = app.read_csv(file_path)
 
                 main_window = app.main_screen(headings, data)
                 print('Data fetched successfully')
@@ -88,8 +93,9 @@ def main():
                         if selected_row_indices:  
                             selected_index = selected_row_indices[0]
                             selected_row = data[selected_index]
+                            current_row = int(selected_row[0]) - 1
                             app.update_risk_window(main_window, selected_row)
-                            app.risk_assessment_window(main_window, data)
+                            app.risk_assessment_window(main_window, data, current_row)
 
                     if mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()
@@ -116,10 +122,13 @@ def main():
                         if user_search == '':
                             continue  
 
-                        search_window, key_to_data = app.search_screen(user_search, filepath)
+                        search_window, key_to_data = app.search_screen(user_search, file_path)
                         
                         while True:
                             sw_event, _ = search_window.read()
+
+                            if sw_event == '-CBUTTON-':
+                                search_window.close()
 
                             if user_search == '' or sw_event in (sg.WIN_CLOSED, 'Exit'):
                                 search_window.close()
@@ -128,7 +137,10 @@ def main():
                             if isinstance(sw_event, str):
                                 match = pattern.match(sw_event)
                                 if match:
+                                    current_row = int(key_to_data[sw_event][0]) - 1
                                     app.update_risk_window(main_window, key_to_data[sw_event])
+                                    app.risk_assessment_window(main_window, data, current_row)
+                                    
                                     search_window.close()
                                     break
 

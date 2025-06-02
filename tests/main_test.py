@@ -122,7 +122,7 @@ def main():
                         print('closing now')
                         main_window.close()
                         break
-                login_window.un_hide()
+                login_window.un_hide()  
 
         elif lw_event == '-HELP-':
             sg.popup('Your API Key allows the app to access data from providers like CoinGecko or CoinMarketCap. Keep it private.')
