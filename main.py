@@ -48,16 +48,15 @@ def main():
                 validity = app.is_valid_cg_api_key(api_key)
 
 
-            if not validity: 
+            if not validity and api_choice == '1': # coingecko wont ping if its free tier
                 sg.popup('Please enter a valid API key.')
             else:
                 print(validity, api_choice, api_key)
 
                 login_window.hide()
             
-                '''
                 try:
-                    result = app.api_request(api_key, api_choice, currency_choice)
+                    result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)
                     
                     if not result or not isinstance(result, tuple) or len(result) != 3:
                         print(len(result), result)
@@ -75,10 +74,9 @@ def main():
                     sg.popup_error(f"Failed to fetch valid data from API:\n{str(e)}")
                     login_window.un_hide()
                     return                
-                '''
-
+                
                 file_path = f'./data/data.csv' # temp way to access csv
-                headings, data = app.read_csv(file_path)
+                headings, data = app.read_csv(file_path) # change to filepath
 
                 main_window = app.main_screen(headings, data)
                 print('Data fetched successfully')

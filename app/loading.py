@@ -1,7 +1,6 @@
 import threading
 import time
 import FreeSimpleGUI as sg
-import app
 
 # Loading screen window
 def show_loading_window():
@@ -52,12 +51,4 @@ def run_with_loading(api_request, api_key, api_choice, currency_choice):
         raise result_holder['error']
 
     return result_holder['value']  # => (headings, data, filename)
-
-def main():
-    result = run_with_loading(app.api_request, 'CG-Y1CthFUh3uNauQ8ehg6TzFCu', '2', 'USD')
-    headings, data, filepath = result
-    print('This is the headings: ', headings)
-    print('This is the data: ', data)
-    print('This is the filepath: ', filepath)
-
-main()
+    

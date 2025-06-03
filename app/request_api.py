@@ -12,9 +12,9 @@ cmc_listing_url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/
 cmc_info_url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/info'
 
 def api_request(api_key, api_choice, currency_choice):
-    currency = currency_choice # get_currency(api_choice)
-
+    
     if api_choice == '1':
+        currency = currency_choice  # combo box input
         parameters = {
             'start':'1',
             'limit':'10',
@@ -91,7 +91,7 @@ def api_request(api_key, api_choice, currency_choice):
                 })
             # Save to CSV
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            filename = f'./data/crypto_extended_{timestamp}.csv'
+            filename = f'./data/CMC_crypto_extended_{timestamp}.csv'
             headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
             print(headings, data, filename)
             return headings, data, filename
@@ -104,66 +104,78 @@ def api_request(api_key, api_choice, currency_choice):
             import traceback
             traceback.print_exc()
             return sg.popup(f"Response missing key: {ke}")
+
     elif api_choice == '2':
         apicheck = f'https://pro-api.coingecko.com/api/v3/ping?x_cg_pro_api_key={api_key}'
-        auth = requests.get(apicheck).json()
-        vs_currency = currency.lower()
-        historical_date = (datetime.now() - timedelta(days=30)).strftime('%d-%m-%Y')
+        requests.get(apicheck)  # just ping
+
+        vs_currency = currency_choice.lower()
         cg_market_url = "https://api.coingecko.com/api/v3/coins/markets"
-        limit = 5
         params = {
             'vs_currency': vs_currency,
             'order': 'market_cap_desc',
-            'per_page': limit,
+            'per_page': 10,
             'page': 1,
-            'sparkline': 'false'
+            'sparkline': 'false',
+            'price_change_percentage': '24h,7d'
         }
+
         market_data = requests.get(cg_market_url, params=params).json()
         output = []
-        for coin in market_data:
+
+        for idx, coin in enumerate(market_data, start=1):
             coin_id = coin['id']
             name = coin['name']
             symbol = coin['symbol']
             price = coin['current_price']
-            volume = coin['total_volume']
+            market_cap = coin.get('market_cap', 'N/A')
+            volume_24h = coin.get('price_change_percentage_24h_in_currency', 'N/A')
+            volume_7d = coin.get('price_change_percentage_7d_in_currency', 'N/A')
+            logo = coin.get('image', 'N/A')
 
-            # Step 2: Get full metadata
+            # Detailed metadata
             cg_coin_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
             cg_coin_info = requests.get(cg_coin_url).json()
 
-            description = cg_coin_info.get('description', {}).get('en', '').split('.')[0]
-            website = cg_coin_info.get('links', {}).get('homepage', [''])[0] or 'N/A'
-            source_code = cg_coin_info.get('links', {}).get('repos_url', {}).get('github', [''])[0] or 'N/A'
+            description = cg_coin_info.get('description', {}).get('en', '').split('.')[0] if cg_coin_info.get('description', {}).get('en') else 'N/A'
+
+            # Safe access for website
+            homepage_links = cg_coin_info.get('links', {}).get('homepage', [])
+            website = homepage_links[0] if homepage_links else 'N/A'
+
+            # Safe access for GitHub source code
+            github_links = cg_coin_info.get('links', {}).get('repos_url', {}).get('github', [])
+            source_code = github_links[0] if github_links else 'N/A'
+
             creation_date = cg_coin_info.get('genesis_date', 'N/A')
 
-            # Step 3: Historical price
-            hist_price = cg_get_historical_price(coin_id, historical_date, vs_currency)
-            time.sleep(1)  # prevent rate-limiting
-
+            # CoinGecko doesn't provide 1h%, so we use 'N/A'
             output.append({
+                '#': idx,
                 'Name': name,
+                'Current Price ('+vs_currency+')': f"{price:,.2f}",
+                '1h%': 'N/A',
+                '24h%': f"{volume_24h:,.2f}" if isinstance(volume_24h, (float, int)) else 'N/A',
+                '7d%': f"{volume_7d:,.2f}" if isinstance(volume_7d, (float, int)) else 'N/A',
+                'Market Cap ('+vs_currency+')': f"{float(market_cap):,.2f}" if isinstance(market_cap, (float, int)) else 'N/A',
+
+                'Logo': logo,
                 'Symbol': symbol.upper(),
-                'Creation Date': creation_date,
-                f'Current Price ({vs_currency.upper()})': f"{price:,.2f}",
-                f'24h Volume ({vs_currency.upper()})': f"{volume:,.2f}",
-                f'Price on {historical_date} ({vs_currency.upper()})': f"{hist_price:,.2f}" if isinstance(hist_price, (float, int)) else hist_price,
                 'Description': description,
+                'Creation Date': creation_date,
                 'Website': website,
                 'Source Code': source_code
             })
+
+            time.sleep(1)  # avoid rate limiting
+
+        # Save to CSV
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f'coingecko_crypto_data_{timestamp}.csv'
-        with open(filename, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.DictWriter(file, fieldnames=output[0].keys())
-            writer.writeheader()
-            writer.writerows(output)
+        filename = f'./data/CG_crypto_extended_cg_{timestamp}.csv'
+        headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
+        print(headings, data, filename)
+        return headings, data, filename
 
-        print(f"✅ Data saved to {filename}")
-
-def get_currency(apichoice):
-    valid_currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'PHP']
-    
-    #return currency
 
 def is_valid_cmc_api_key(api_key):
     url = cmc_listing_url
@@ -175,7 +187,7 @@ def is_valid_cmc_api_key(api_key):
         return False
     
 def is_valid_cg_api_key(api_key):
-    url = 'https://api.coingecko.com/api/v3/'
+    url = 'https://api.coingecko.com/api/v3/pro'
     try:
         response = requests.get(url)
         return response.status_code == 200
