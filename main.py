@@ -12,10 +12,12 @@ current_image = {
     '-IMAGE-': './images/resizedCMC.png',
 }
 currency_choice = 'USD'
-
 data = []
 
+
 def main():
+    current_page = 1
+    rows_per_page = 14
     login_window = app.login_screen()
     # Main event loop
     while True:
@@ -66,6 +68,27 @@ def main():
                     mw_event, mw_values = main_window.read()
                     print(mw_event)
 
+                    if mw_event == '-SCORE-CLICKED-':
+                        key = mw_values[mw_event]
+                        # Show popup here
+                        if key in app.descriptions:
+                            title, msg = app.descriptions[key]
+                            sg.popup(title, msg, title=title, font=("Helvetica", 12), keep_on_top=True)
+
+                    if mw_event == '-MAIN-CLICKED-':
+                        sg.Window(
+                            "Risk Score Guide",
+                            [
+                                [sg.Text("Score Interpretation", font=("Helvetica", 14, "bold"))],
+                                [sg.Text("1 - 3   : High-Risk/Fraudulent (Avoid)", text_color="red", font=("Helvetica", 10, "bold"))],
+                                [sg.Text("4 - 6   : Medium Risk (Caution)", text_color="orange", font=("Helvetica", 10, "bold"))],
+                                [sg.Text("7 - 10  : Trustworthy (Safe to interact with)", text_color="green", font=("Helvetica", 10, "bold"))],
+                                [sg.Button("OK", size=(10, 1))]
+                            ],
+                            modal=True,
+                            keep_on_top=True
+                        ).read(close=True) 
+
                     if mw_event == '-TABLE-':
                         selected_row_indices = mw_values['-TABLE-']
                         print(selected_row_indices)
@@ -79,6 +102,18 @@ def main():
                     if mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()
                         break
+
+                    elif mw_event == '-NEXT-':
+                        max_pages = (len(data) + rows_per_page - 1) // rows_per_page
+                        if current_page < max_pages:
+                            current_page += 1
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
+                            main_window['-PAGENO-'].update(str(current_page))
+                    elif mw_event == '-PREV-':
+                        if current_page > 1:
+                            current_page -= 1
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
+                            main_window['-PAGENO-'].update(str(current_page))
 
                     # sorting buttons
                     if mw_event == '-NUMBER-': # sort by ascending/descending

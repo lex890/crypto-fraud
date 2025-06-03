@@ -1,7 +1,13 @@
 import FreeSimpleGUI as sg
 from . import risk_assessment as rsk
 
-def main_screen(headings, data):
+def get_page_data(data, page, rows_per_page):
+    start = (page - 1) * rows_per_page
+    end = start + rows_per_page
+    return data[start:end]
+
+
+def main_screen(headings, data, current_page, rows_per_page):
     page_nav = [
         [
             
@@ -35,18 +41,18 @@ def main_screen(headings, data):
     table = [
         [
             sg.Table(
-            values=data,
-            headings=headings[:7],
-            max_col_width=10,
-            auto_size_columns=False,
-            justification='center',
-            col_widths=[5, 12, 16, 6, 6, 6, 18],
-            num_rows=14,
-            key='-TABLE-',
-            row_height=51,
-            font=('Helvetica', 12, 'bold'),
-            hide_vertical_scroll=True,
-            enable_events=True
+                values=get_page_data(data, current_page, rows_per_page),
+                headings=headings[:7],
+                max_col_width=10,
+                auto_size_columns=False,
+                justification='center',
+                col_widths=[5, 12, 16, 6, 6, 6, 18],
+                num_rows=rows_per_page,
+                key='-TABLE-',
+                row_height=51,
+                font=('Helvetica', 12, 'bold'),
+                hide_vertical_scroll=True,
+                enable_events=True
             )
         ],
         [         

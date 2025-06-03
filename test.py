@@ -12,43 +12,12 @@ current_image = {
     '-IMAGE-': './images/resizedCMC.png',
 }
 currency_choice = 'USD'
-
 data = []
-descriptions = {
-            '-SCORE1-': ("Trading Volume Consistency", 
-                        "Checks if trading volume is stable over time.\n"
-                        "Sudden unexplained spikes or drops may indicate manipulation."),
-            '-SCORE2-': ("Liquidity & Order Book Depth", 
-                        "Evaluates how easily tokens can be bought or sold without affecting the price.\n"
-                        "Thin order books are common in scams or pump-and-dump schemes."),
-            '-SCORE3-': ("Token Age & Market History", 
-                        "Older tokens with long-term trading history are generally more trustworthy.\n"
-                        "Recently launched tokens may be more prone to fraud."),
-            '-SCORE4-': ("Developer & Team Transparency", 
-                        "Assesses the public presence and credibility of the developers.\n"
-                        "Anonymous or unverifiable teams are considered high risk."),
-            '-SCORE5-': ("Smart Contract Audit & Security", 
-                        "Checks if the token's smart contract has undergone third-party audits.\n"
-                        "Unaudited or poorly written contracts may be vulnerable to exploits."),
-            '-SCORE6-': ("Exchange Listings & Reputation", 
-                        "Verifies if the token is listed on reputable exchanges.\n"
-                        "Listing on major exchanges often indicates vetting and legitimacy."),
-            '-SCORE7-': ("Community & Social Media Presence", 
-                        "Analyzes activity on platforms like Twitter, Reddit, and Telegram.\n"
-                        "Organic engagement suggests community trust and interest."),
-            '-SCORE8-': ("Transaction Patterns & Anomalies", 
-                        "Looks for suspicious patterns like repetitive large transfers,\n"
-                        "wallet clustering, or sudden inactivity — common in scams."),
-            '-SCORE9-': ("Whitepaper & Roadmap Execution", 
-                        "Evaluates the quality and realism of the project's whitepaper and roadmap.\n"
-                        "Empty buzzwords or no progress suggest a potential scam."),
-            '-SCORE10-': ("Regulatory Compliance & Legal Standing", 
-                        "Checks for known legal issues or warnings from authorities.\n"
-                        "Projects compliant with regulations are generally safer."),
-        }
-
 
 def main():
+    current_page = 1
+    rows_per_page = 14
+
     login_window = app.login_screen()
     # Main event loop
     while True:
@@ -90,7 +59,7 @@ def main():
                 filepath = f'./data/data.csv' # temp way to access csv
                 headings, data = app.read_csv(filepath) # change to filepath
 
-                main_window = app.main_screen(headings, data)
+                main_window = app.main_screen(headings, data, current_page, rows_per_page)
                 print('Data fetched successfully')
                 reverse_flag = True
                 while True:
@@ -100,8 +69,8 @@ def main():
                     if mw_event == '-SCORE-CLICKED-':
                         key = mw_values[mw_event]
                         # Show popup here
-                        if key in descriptions:
-                            title, msg = descriptions[key]
+                        if key in app.descriptions:
+                            title, msg = app.descriptions[key]
                             sg.popup(title, msg, title=title, font=("Helvetica", 12), keep_on_top=True)
 
                     if mw_event == '-MAIN-CLICKED-':
@@ -119,40 +88,53 @@ def main():
                         ).read(close=True)                    
 
                     if mw_event == '-TABLE-':
-                        selected_row_indices = mw_values['-TABLE-']
-                        print(selected_row_indices)
-                        if selected_row_indices:  
-                            selected_index = selected_row_indices[0]
-                            selected_row = data[selected_index]
-                            current_row = int(selected_row[0]) - 1
-                            app.update_risk_window(main_window, selected_row)
-                            app.risk_assessment_window(main_window, data, current_row)
+                        selected_indices = mw_values['-TABLE-']  # Row indices on current page
+                        print(selected_indices)
+
+                        if selected_indices:
+                            row_on_page = selected_indices[0]
+                            visible_rows = app.get_page_data(data, current_page, rows_per_page)
+                            selected_row_data = visible_rows[row_on_page]
+                            absolute_row_index = data.index(selected_row_data)
+
+                            app.update_risk_window(main_window, selected_row_data)
+                            app.risk_assessment_window(main_window, data, absolute_row_index)
 
                     if mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()
                         break
 
-                    if mw_event == '-NEXT-':
-                        current_page = int(main_window['-PAGENO-'].DisplayText)
-                        main_window['-PAGENO-'].update(str(current_page + 1))
+                    elif mw_event == '-NEXT-':
+                        max_pages = (len(data) + rows_per_page - 1) // rows_per_page
+                        if current_page < max_pages:
+                            current_page += 1
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
+                            main_window['-PAGENO-'].update(str(current_page))
                     elif mw_event == '-PREV-':
-                        current_page = int(main_window['-PAGENO-'].DisplayText)
                         if current_page > 1:
-                            main_window['-PAGENO-'].update(str(current_page - 1))
+                            current_page -= 1
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
+                            main_window['-PAGENO-'].update(str(current_page))
 
                     # sorting buttons
                     if mw_event == '-NUMBER-': # sort by ascending/descending
+                        current_page = 1
                         data.sort(key=lambda x: int(x[0]), reverse = reverse_flag)
                         reverse_flag = not reverse_flag
                         main_window['-TABLE-'].update(values=data)
+                        main_window['-PAGENO-'].update(str(current_page))
                     if mw_event == '-ALPHA-': # sort by alphabetical order
+                        current_page = 1
                         data.sort(key=lambda x: x[1], reverse = reverse_flag)
                         reverse_flag = not reverse_flag
                         main_window['-TABLE-'].update(values=data)
+                        main_window['-PAGENO-'].update(str(current_page))
                     if mw_event == '-PRICE-': # sort by current price
+                        current_page = 1
                         data.sort(key=lambda x: float(x[2].replace(',', '')), reverse = reverse_flag)
                         reverse_flag = not reverse_flag 
                         main_window['-TABLE-'].update(values=data)
+                        main_window['-PAGENO-'].update(str(current_page))
 
                     # search button
                     if mw_event == '-SBUTTON-':

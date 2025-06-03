@@ -169,7 +169,7 @@ def score_window(data, headings):
 
     score = [[sg.Canvas(key="-MAINSCORE-", background_color=sg.theme_background_color(), size=(300, 300), tooltip='Overall Assessment Score')]]  # fix canvas space
 
-    upper_window = [
+    upper_content = [
         [
             sg.Column(logo, element_justification='center', vertical_alignment='top'),
             sg.Column(info, element_justification='left', vertical_alignment='top', size=(560, 306)),
@@ -177,19 +177,28 @@ def score_window(data, headings):
         ]
     ]
 
+    upper_window = [
+        [
+            sg.Column(
+            upper_content,
+            pad=(0, (0, 50)),
+            background_color="#f5f5f5")
+        ]
+    ]
+
     lower_window = [
         [
-         sg.Column(
+             sg.Column(
              [assessment_score[:5]],
              pad=((0, 0), 0),
-             background_color='#ececec')
+             background_color='#f5f5f5')
         ],
 
         [
-         sg.Column(
+             sg.Column(
              [assessment_score[5:]],
              pad=((0, 0), 0),
-             background_color="#ececec")
+             background_color="#f5f5f5")
         ]
     ]
 
