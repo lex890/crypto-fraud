@@ -8,7 +8,7 @@ sg.theme('LightGrey1')
 figure_canvas_agg_dict = {}
 score_data_for_canvas = {}
 
-def draw_figure(canvas_elem, figure, key, data_for_chart, is_main_score=False): 
+def draw_figure(canvas_elem, figure, key, data_for_chart, window, is_main_score=False): 
     canvas = canvas_elem.TKCanvas
     if key in figure_canvas_agg_dict:
         figure_canvas_agg_dict[key].get_tk_widget().forget()
@@ -25,59 +25,15 @@ def draw_figure(canvas_elem, figure, key, data_for_chart, is_main_score=False):
     # Store the data and is_main_score status associated with this key
     score_data_for_canvas[key] = {'data': data_for_chart, 'is_main': is_main_score}
 
+    # to allow Canvas Component to be clickable
     def on_click(event, canvas_key=key):
-        descriptions = {
-            '-SCORE1-': ("Trading Volume Consistency", 
-                        "Checks if trading volume is stable over time.\n"
-                        "Sudden unexplained spikes or drops may indicate manipulation."),
-            '-SCORE2-': ("Liquidity & Order Book Depth", 
-                        "Evaluates how easily tokens can be bought or sold without affecting the price.\n"
-                        "Thin order books are common in scams or pump-and-dump schemes."),
-            '-SCORE3-': ("Token Age & Market History", 
-                        "Older tokens with long-term trading history are generally more trustworthy.\n"
-                        "Recently launched tokens may be more prone to fraud."),
-            '-SCORE4-': ("Developer & Team Transparency", 
-                        "Assesses the public presence and credibility of the developers.\n"
-                        "Anonymous or unverifiable teams are considered high risk."),
-            '-SCORE5-': ("Smart Contract Audit & Security", 
-                        "Checks if the token's smart contract has undergone third-party audits.\n"
-                        "Unaudited or poorly written contracts may be vulnerable to exploits."),
-            '-SCORE6-': ("Exchange Listings & Reputation", 
-                        "Verifies if the token is listed on reputable exchanges.\n"
-                        "Listing on major exchanges often indicates vetting and legitimacy."),
-            '-SCORE7-': ("Community & Social Media Presence", 
-                        "Analyzes activity on platforms like Twitter, Reddit, and Telegram.\n"
-                        "Organic engagement suggests community trust and interest."),
-            '-SCORE8-': ("Transaction Patterns & Anomalies", 
-                        "Looks for suspicious patterns like repetitive large transfers,\n"
-                        "wallet clustering, or sudden inactivity — common in scams."),
-            '-SCORE9-': ("Whitepaper & Roadmap Execution", 
-                        "Evaluates the quality and realism of the project's whitepaper and roadmap.\n"
-                        "Empty buzzwords or no progress suggest a potential scam."),
-            '-SCORE10-': ("Regulatory Compliance & Legal Standing", 
-                        "Checks for known legal issues or warnings from authorities.\n"
-                        "Projects compliant with regulations are generally safer."),
-        }
-
-        if canvas_key in descriptions:
-            title, message = descriptions[canvas_key]
-            sg.popup(title, message, title=title, font=("Helvetica", 12), keep_on_top=True)
-
-        elif canvas_key == '-MAINSCORE-':
-            sg.Window(
-                "Risk Score Guide",
-                [
-                    [sg.Text("Score Interpretation", font=("Helvetica", 14, "bold"))],
-                    [sg.Text("1 - 3   : High-Risk/Fraudulent (Avoid)", text_color="red", font=("Helvetica", 10, "bold"))],
-                    [sg.Text("4 - 6   : Medium Risk (Caution)", text_color="orange", font=("Helvetica", 10, "bold"))],
-                    [sg.Text("7 - 10  : Trustworthy (Safe to interact with)", text_color="green", font=("Helvetica", 10, "bold"))],
-                    [sg.Button("OK", size=(10, 1))]
-                ],
-                modal=True, keep_on_top=True
-            ).read(close=True)
+        print('Canvas Key: ',canvas_key)
+        if (canvas_key == '-MAINSCORE-'):
+            window.write_event_value('-MAIN-CLICKED-', canvas_key)
+        else:
+            window.write_event_value('-SCORE-CLICKED-', canvas_key)
 
     widget.bind("<Button-1>", on_click)
-
     # Store reference
     figure_canvas_agg_dict[key] = figure_canvas_agg
 
@@ -151,7 +107,7 @@ def risk_assessment_window(window, data, row=0):
         if canvas_key in window.AllKeysDict:
             canvas_elem = window[canvas_key]
 
-            draw_figure(canvas_elem, fig, canvas_key, chart_data, is_main_score_flag) # Pass data and flag
+            draw_figure(canvas_elem, fig, canvas_key, chart_data, window, is_main_score_flag) # Pass data and flag
 
 
 def update_risk_window(main_window, selected_row):
@@ -213,21 +169,31 @@ def score_window(data, headings):
 
     score = [[sg.Canvas(key="-MAINSCORE-", background_color=sg.theme_background_color(), size=(300, 300), tooltip='Overall Assessment Score')]]  # fix canvas space
 
-    layout = [
+    upper_window = [
         [
-         sg.Column(logo, element_justification='center', vertical_alignment='top'),
-         sg.Column(info, element_justification='left', vertical_alignment='top', size=(560, 306)),
-         sg.Column(score, element_justification='center', vertical_alignment='top')
-        ],
-
-        [
-         sg.Column([assessment_score[:5]], element_justification='center', expand_x=True, expand_y=True)
-        ],
-
-        [
-         sg.Column([assessment_score[5:]], element_justification='center', expand_x=True, expand_y=True)
+            sg.Column(logo, element_justification='center', vertical_alignment='top'),
+            sg.Column(info, element_justification='left', vertical_alignment='top', size=(560, 306)),
+            sg.Column(score, element_justification='center', vertical_alignment='top')
         ]
     ]
+
+    lower_window = [
+        [
+         sg.Column(
+             [assessment_score[:5]],
+             pad=((0, 0), 0),
+             background_color='#ececec')
+        ],
+
+        [
+         sg.Column(
+             [assessment_score[5:]],
+             pad=((0, 0), 0),
+             background_color="#ececec")
+        ]
+    ]
+
+    layout = upper_window + lower_window
 
     return layout
 

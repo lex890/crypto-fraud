@@ -1,0 +1,11 @@
+#,Name,Current Price (usd),1h%,24h%,7d%,Market Cap (usd),Logo,Symbol,Description,Creation Date,Website,Source Code
+1,Bitcoin,"105,194.00",N/A,-0.25,-3.93,"2,091,173,079,816.00",https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400,BTC,Bitcoin is the first successful internet money based on peer-to-peer technology; whereby no central bank or authority is involved in the transaction and production of the Bitcoin currency,2009-01-03,http://www.bitcoin.org,https://github.com/bitcoin/bitcoin
+2,Ethereum,"2,608.72",N/A,3.99,0.20,"315,134,786,819.00",https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628,ETH,"Ethereum is a global, open-source platform for decentralized applications",2015-07-30,https://www.ethereum.org/,https://github.com/ethereum/go-ethereum
+3,Tether,1.00,N/A,0.01,0.02,"153,376,483,431.00",https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661,USDT,Tether (USDT) is a cryptocurrency with a value meant to mirror the value of the U,,https://tether.to/,N/A
+4,XRP,2.19,N/A,0.96,-4.80,"128,808,501,625.00",https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442,XRP,"Ripple is the catchall name for the cryptocurrency platform, the transactional protocol for which is actually XRP, in the same fashion as Ethereum is the name for the platform that facilitates trades in Ether",,https://ripple.com/currency/,https://github.com/ripple/rippled
+5,BNB,665.54,N/A,1.17,-2.14,"97,122,323,676.00",https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970,BNB,N/A,N/A,N/A,N/A
+6,Solana,159.68,N/A,2.55,-8.93,"83,480,257,543.00",https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756,SOL,N/A,N/A,N/A,N/A
+7,USDC,1.00,N/A,0.00,0.01,"61,111,291,612.00",https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694,USDC,N/A,N/A,N/A,N/A
+8,Dogecoin,0.20,N/A,1.63,-14.22,"29,195,422,568.00",https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png?1696501409,DOGE,N/A,N/A,N/A,N/A
+9,TRON,0.27,N/A,0.15,-2.34,"25,644,180,718.00",https://coin-images.coingecko.com/coins/images/1094/large/tron-logo.png?1696502193,TRX,N/A,N/A,N/A,N/A
+10,Cardano,0.69,N/A,2.22,-9.34,"25,041,364,277.00",https://coin-images.coingecko.com/coins/images/975/large/cardano.png?1696502090,ADA,N/A,N/A,N/A,N/A

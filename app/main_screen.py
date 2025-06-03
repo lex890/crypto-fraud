@@ -2,6 +2,58 @@ import FreeSimpleGUI as sg
 from . import risk_assessment as rsk
 
 def main_screen(headings, data):
+    page_nav = [
+        [
+            
+            sg.Button(
+                image_filename='./images/arrow-left-icon.png',
+                size=(50, 50),
+                key='-PREV-',
+                button_color=("#F0F0F0", sg.theme_background_color()),
+                border_width=0,
+                focus=False
+            ),
+            sg.Text(
+                '1',
+                font=('Helvetica', 16, 'bold'),
+                pad=((25, 0), (0, 0)),
+                enable_events=True,
+                key='-PAGENO-'
+            ),
+            sg.Button(
+                image_filename='./images/arrow-right-icon.png',
+                size=(50, 50),
+                key='-NEXT-',
+                button_color=("#F0F0F0", sg.theme_background_color()),
+                border_width=0,
+                focus=False,
+                pad=((30, 0), 0)
+            )
+        ]
+    ]
+
+    table = [
+        [
+            sg.Table(
+            values=data,
+            headings=headings[:7],
+            max_col_width=10,
+            auto_size_columns=False,
+            justification='center',
+            col_widths=[5, 12, 16, 6, 6, 6, 18],
+            num_rows=14,
+            key='-TABLE-',
+            row_height=51,
+            font=('Helvetica', 12, 'bold'),
+            hide_vertical_scroll=True,
+            enable_events=True
+            )
+        ],
+        [         
+            sg.Column(page_nav)
+        ]
+    ]
+
     layout = [
         #header and icon
         [
@@ -39,24 +91,9 @@ def main_screen(headings, data):
             ],
             # lower part of the main screen
             [
-                sg.Table(
-                    values=data,
-                    headings=headings[:7],
-                    max_col_width=10,
-                    auto_size_columns=False,
-                    justification='center',
-                    col_widths=[5, 12, 16, 6, 6, 6, 18],
-                    num_rows=15,
-                    key='-TABLE-',
-                    row_height=51,
-                    font=('Helvetica', 12, 'bold'),
-                    pad=((50, 0), (0, 0)),
-                    hide_vertical_scroll=True,
-                    enable_events=True
-                ),
-                sg.Column(rsk.score_window(data, headings), background_color="#E6E6E6", expand_y=True, expand_x=True, pad=((50, 50), (42, 40)),)
+                sg.Column(table, expand_y=True, expand_x=True, pad=((50, 50), (42, 40)), element_justification='center'),
+                sg.Column(rsk.score_window(data, headings), expand_y=True, expand_x=True, pad=((50, 50), (42, 40)),)
             ]
-            
         ]
     ]
     window = sg.Window('Main App', layout, finalize=True, resizable=True)

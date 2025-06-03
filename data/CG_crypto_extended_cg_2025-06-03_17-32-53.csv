@@ -1,0 +1,11 @@
+#,Name,Current Price (usd),1h%,24h%,7d%,Market Cap (usd),Logo,Symbol,Description,Creation Date,Website,Source Code
+1,Bitcoin,"105,132.00",N/A,0.29,-4.13,"2,089,948,655,198.00",https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400,BTC,Bitcoin is the first successful internet money based on peer-to-peer technology; whereby no central bank or authority is involved in the transaction and production of the Bitcoin currency,2009-01-03,http://www.bitcoin.org,https://github.com/bitcoin/bitcoin
+2,Ethereum,"2,605.34",N/A,4.74,-1.12,"314,628,543,572.00",https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628,ETH,"Ethereum is a global, open-source platform for decentralized applications",2015-07-30,https://www.ethereum.org/,https://github.com/ethereum/go-ethereum
+3,Tether,1.00,N/A,0.01,0.02,"153,376,511,746.00",https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661,USDT,Tether (USDT) is a cryptocurrency with a value meant to mirror the value of the U,,https://tether.to/,N/A
+4,XRP,2.19,N/A,1.67,-5.15,"128,776,399,513.00",https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1696501442,XRP,N/A,N/A,N/A,N/A
+5,BNB,665.80,N/A,1.74,-2.29,"97,134,818,430.00",https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970,BNB,N/A,N/A,N/A,N/A
+6,Solana,159.12,N/A,3.26,-9.44,"83,155,240,833.00",https://coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756,SOL,N/A,N/A,N/A,N/A
+7,USDC,1.00,N/A,0.01,0.01,"61,103,955,180.00",https://coin-images.coingecko.com/coins/images/6319/large/usdc.png?1696506694,USDC,N/A,N/A,N/A,N/A
+8,Dogecoin,0.19,N/A,2.04,-14.95,"29,044,506,529.00",https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png?1696501409,DOGE,N/A,N/A,N/A,N/A
+9,TRON,0.27,N/A,0.17,-2.66,"25,653,562,208.00",https://coin-images.coingecko.com/coins/images/1094/large/tron-logo.png?1696502193,TRX,N/A,N/A,N/A,N/A
+10,Cardano,0.69,N/A,3.43,-10.08,"24,987,900,907.00",https://coin-images.coingecko.com/coins/images/975/large/cardano.png?1696502090,ADA,N/A,N/A,N/A,N/A

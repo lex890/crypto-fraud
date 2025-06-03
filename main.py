@@ -1,6 +1,6 @@
+import re
 import app
 import FreeSimpleGUI as sg
-import re
 
 sg.theme('LightGrey1')
 sg.theme_button_color(('black', 'gainsboro'))
@@ -16,8 +16,7 @@ currency_choice = 'USD'
 data = []
 
 def main():
-    login_window = app.login_screen() #should be login first "log.login_screen()"
-
+    login_window = app.login_screen()
     # Main event loop
     while True:
         lw_event, lw_values = login_window.read()
@@ -40,7 +39,7 @@ def main():
             currency_choice = lw_values.get('-CURRENCY-')
             print(f"API Key Entered: '{api_key}'")  # Add logging
             print(f"Currency Choice: '{currency_choice}'")  # Add logging
-            api_choice = '1' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 2
+            api_choice = '1' if current_image['-IMAGE-'] == './images/resizedCMC.png' else '2'
             
             if (api_choice == '1'):
                 validity = app.is_valid_cmc_api_key(api_key)
@@ -54,29 +53,11 @@ def main():
                 print(validity, api_choice, api_key)
 
                 login_window.hide()
-            
-                try:
-                    result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)
-                    
-                    if not result or not isinstance(result, tuple) or len(result) != 3:
-                        print(len(result), result)
-                        raise ValueError("Unexpected response format from API.")
 
-                    headings, data, filepath = result
+                result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)
 
-                    if not headings or not isinstance(headings, list) or not all(isinstance(h, str) for h in headings):
-                        raise ValueError("Invalid or missing table headings.")
-
-                    if not data or not isinstance(data, list) or not all(isinstance(row, (list, tuple)) and len(row) == len(headings) for row in data):
-                        raise ValueError("Invalid or mismatched data rows.")
-
-                except Exception as e:
-                    sg.popup_error(f"Failed to fetch valid data from API:\n{str(e)}")
-                    login_window.un_hide()
-                    return                
-                
-                file_path = f'./data/data.csv' # temp way to access csv
-                headings, data = app.read_csv(file_path) # change to filepath
+                headings, data, filepath = result #remove
+                print(headings, data, filepath)
 
                 main_window = app.main_screen(headings, data)
                 print('Data fetched successfully')
@@ -120,7 +101,7 @@ def main():
                         if user_search == '':
                             continue  
 
-                        search_window, key_to_data = app.search_screen(user_search, file_path)
+                        search_window, key_to_data = app.search_screen(user_search, filepath)
                         
                         while True:
                             sw_event, _ = search_window.read()
