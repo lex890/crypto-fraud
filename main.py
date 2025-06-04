@@ -33,6 +33,19 @@ def main():
                 new_image = cg_img
             login_window['-CRYPTO-'].update(filename=new_image)     # crypto logo
             current_image['-IMAGE-'] = new_image                    # update image container
+
+        elif lw_event == '-KEYSTORE-':
+            api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
+            cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
+            new_api_key = app.load_api_key(api_choice, cfg_key)
+            login_window['-API-'].update(value=new_api_key) 
+        
+        elif lw_event == '-SAVEKEY-':
+            api_key = lw_values.get('-API-', '').strip() #read API key
+            api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
+            cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
+            app.save_api_key(api_choice, api_key, cfg_key)
+
         elif lw_event == 'Clear': # clear the api key input  
             login_window['-API-'].update('')
 
@@ -42,7 +55,7 @@ def main():
             print(f"API Key Entered: '{api_key}'")  # Add logging
             print(f"Currency Choice: '{currency_choice}'")  # Add logging
             api_choice = '1' if current_image['-IMAGE-'] == './images/resizedCMC.png' else '2'
-            
+        
             if (api_choice == '1'):
                 validity = app.is_valid_cmc_api_key(api_key)
             else:

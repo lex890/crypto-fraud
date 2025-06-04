@@ -20,8 +20,8 @@ def resize_image(image_path, new_width, new_height, output_path):
         print(f"An error occurred: {e}")
 
 # Example usage:
-image_path = "./images/arrow-right.png"  # Replace with your image path
+image_path = "./images/bookmark.png"  # Replace with your image path
 new_width = 30 
-new_height = 30 
-output_path = "./images/arrow-right-icon.png" # Replace with your desired output path
+new_height = 30
+output_path = "./images/save-key.png" # Replace with your desired output path
 resize_image(image_path, new_width, new_height, output_path)

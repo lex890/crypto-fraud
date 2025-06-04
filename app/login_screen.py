@@ -16,8 +16,10 @@ def login_screen():
 
         [
             sg.Push(),
-            sg.InputText(key='-API-', size=(40, 1), font=('Helvetica', 12), tooltip='Enter API Key', default_text='CG-Y1CthFUh3uNauQ8ehg6TzFCu'),
-            sg.Image(filename='./images/resizedCMC.png', size=(50, 50), enable_events=True, key='-CRYPTO-',),
+            sg.InputText(key='-API-', size=(40, 1), font=('Helvetica', 12), tooltip='Enter API Key', default_text='', pad=((20, 0), (0, 0))),
+            sg.Image(filename='./images/resizedCMC.png', size=(50, 50), enable_events=True, key='-CRYPTO-', tooltip='Select your API key provider.'),
+            sg.Image(filename='./images/tool-tip.png', size=(20, 20), enable_events=True, key='-HELP-', tooltip='What is an API Key?',
+            pad=((0, 0), (0, 45))),
             sg.Push()
         ],
 
@@ -33,10 +35,26 @@ def login_screen():
 
         [
             sg.Push(),
-            sg.Text('What is an API Key', font=('Helvetica', 10), enable_events=True, key='-HELP-',
-                    pad=((0, 0), (100, 0))),
-            sg.Text('❓', pad=((0, 0), (100, 0)))
+            sg.Image(
+                './images/keystore.png',
+                size=(30, 30),
+                key='-KEYSTORE-',
+                pad=((0, 0), (35, 0)),
+                enable_events=True
+            )
+        ],
+        
+        [
+            sg.Push(),
+            sg.Image(
+                './images/save-key.png',
+                size=(30, 30),
+                key='-SAVEKEY-',
+                pad=((0, 0), (10, 0)),
+                enable_events=True
+            )
         ]
+
     ]
 
     return sg.Window('Crypto Fraud Detection Tool', layout, size=(800, 450))

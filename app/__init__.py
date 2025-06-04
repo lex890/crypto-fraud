@@ -5,6 +5,6 @@ from .main_screen import *
 from .request_api import *
 from .get_images import *
 from .score_dict import *
+from .keystore import *
 from .loading import *
 from .table import *
-

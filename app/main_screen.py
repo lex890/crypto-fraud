@@ -73,7 +73,15 @@ def main_screen(headings, data, current_page, rows_per_page):
             [   
                 sg.Button('', image_filename='./images/byalphaR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((50, 0), (75, 0)), key=('-ALPHA-'), tooltip='Sort by Alpha'),
                 sg.Button('', image_filename='./images/bynumberR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-NUMBER-'), tooltip='Sort by Ranking(#)'),
-                sg.Button('', image_filename='./images/bypriceR.png',image_size=(50, 50), button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, pad=((10, 0), (75, 0)), key=('-PRICE-'), tooltip='Sort by Price($)'),
+                sg.Button(
+                    '', 
+                    image_filename='./images/bypriceR.png',
+                    image_size=(50, 50), 
+                    button_color=("#F0F0F0", sg.theme_background_color()), border_width=1, 
+                    pad=((10, 0), (75, 0)), 
+                    key=('-PRICE-'), 
+                    tooltip='Sort by Price($)'
+                ),    
 
                 sg.InputText(
                     default_text='',
