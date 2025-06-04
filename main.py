@@ -38,13 +38,17 @@ def main():
             api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
             cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
             new_api_key = app.load_api_key(api_choice, cfg_key)
-            login_window['-API-'].update(value=new_api_key) 
+            login_window['-API-'].update(value=new_api_key)
+            sg.popup_auto_close(f'Pasted the API Key for {api_choice}', auto_close_duration=3) 
         
         elif lw_event == '-SAVEKEY-':
             api_key = lw_values.get('-API-', '').strip() #read API key
+
             api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
             cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
+
             app.save_api_key(api_choice, api_key, cfg_key)
+            sg.popup_auto_close(f'Saved API Key for {api_choice}', auto_close_duration=3) 
 
         elif lw_event == 'Clear': # clear the api key input  
             login_window['-API-'].update('')

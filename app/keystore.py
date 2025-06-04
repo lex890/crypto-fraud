@@ -4,7 +4,7 @@ import os
 cfg_path='./keys/settings.cfg'
 
 # Your functions here...
-def save_api_key(identifier, api_key, key_name="KEY", cfg_path=cfg_path):
+def save_api_key(identifier, api_key, key_name, cfg_path=cfg_path):
     
     config = configparser.ConfigParser()
     if not api_key.strip():
@@ -18,8 +18,8 @@ def save_api_key(identifier, api_key, key_name="KEY", cfg_path=cfg_path):
     if not config.has_section(identifier):
         config.add_section(identifier)
 
-    config.set("Main", "RecentAPI", api_key)
-    config.set(identifier, key_name, api_key)
+    config.set("Main", "RecentAPI", api_key)  # Previously used API key
+    config.set(identifier, key_name, api_key) # Current used API key
 
     # Save to file (overwrites content, but config holds all existing values)
     with open(cfg_path, 'w') as configfile:
@@ -28,7 +28,7 @@ def save_api_key(identifier, api_key, key_name="KEY", cfg_path=cfg_path):
     print(f"API key saved to '{cfg_path}' under section [{identifier}].")
     print(cfg_path)
 
-def load_api_key(identifier, key_name='CMCKEY', cfg_path=cfg_path):
+def load_api_key(identifier, key_name, cfg_path=cfg_path):
     config = configparser.ConfigParser()
     if not os.path.exists(cfg_path):
         print(f"No config file found at {cfg_path}. Please save an API key first.")

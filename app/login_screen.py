@@ -40,7 +40,8 @@ def login_screen():
                 size=(30, 30),
                 key='-KEYSTORE-',
                 pad=((0, 0), (35, 0)),
-                enable_events=True
+                enable_events=True,
+                tooltip='Auto paste API Key'
             )
         ],
         
@@ -51,7 +52,8 @@ def login_screen():
                 size=(30, 30),
                 key='-SAVEKEY-',
                 pad=((0, 0), (10, 0)),
-                enable_events=True
+                enable_events=True,
+                tooltip='Save the API key'
             )
         ]
 
