@@ -12,10 +12,9 @@ current_image = {
     '-IMAGE-': './images/resizedCMC.png',
 }
 currency_choice = 'USD'
-data = []
-
 
 def main():
+    data = []
     current_page = 1
     rows_per_page = 14
     login_window = app.login_screen()
@@ -35,20 +34,23 @@ def main():
             current_image['-IMAGE-'] = new_image                    # update image container
 
         elif lw_event == '-KEYSTORE-':
-            api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
-            cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
+            imagepath = current_image['-IMAGE-']
+            api_choice = app.get_api_choice(imagepath)
+            cfg_key = app.get_cfg_key(imagepath)
+
             new_api_key = app.load_api_key(api_choice, cfg_key)
             login_window['-API-'].update(value=new_api_key)
-            sg.popup_auto_close(f'Pasted the API Key for {api_choice}', auto_close_duration=3) 
+            sg.popup_auto_close(f'Pasted the API Key for {api_choice}', auto_close_duration=2) 
         
         elif lw_event == '-SAVEKEY-':
             api_key = lw_values.get('-API-', '').strip() #read API key
 
-            api_choice = 'CoinMarketCap' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CoinGecko'
-            cfg_key = 'CMCKEY' if current_image['-IMAGE-'] == './images/resizedCMC.png' else 'CGKEY'
+            imagepath = current_image['-IMAGE-']
+            api_choice = app.get_api_choice(imagepath)
+            cfg_key = app.get_cfg_key(imagepath)
 
             app.save_api_key(api_choice, api_key, cfg_key)
-            sg.popup_auto_close(f'Saved API Key for {api_choice}', auto_close_duration=3) 
+            sg.popup_auto_close(f'Saved API Key for {api_choice}', auto_close_duration=2) 
 
         elif lw_event == 'Clear': # clear the api key input  
             login_window['-API-'].update('')
@@ -65,7 +67,6 @@ def main():
             else:
                 validity = app.is_valid_cg_api_key(api_key)
 
-
             if not validity and api_choice == '1': # coingecko wont ping if its free tier
                 sg.popup('Please enter a valid API key.')
             else:
@@ -73,12 +74,20 @@ def main():
 
                 login_window.hide()
 
-                result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)
+                '''
+                result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)    
 
-                headings, data, filepath = result #remove
-                print(headings, data, filepath)
+                if not result or not isinstance(result, tuple) or len(result) != 3:
+                    sg.popup("Unexpected API response. Please try again.")
+                    login_window.un_hide()
+                    continue
+                headings, data, filepath = result         
+                '''
 
-                main_window = app.main_screen(headings, data)
+                filepath = './data/data.csv'
+                headings, data = app.read_csv(filepath)
+
+                main_window = app.main_screen(headings, data, current_page, rows_per_page)
                 print('Data fetched successfully')
                 reverse_flag = True
                 while True:
@@ -92,7 +101,7 @@ def main():
                             title, msg = app.descriptions[key]
                             sg.popup(title, msg, title=title, font=("Helvetica", 12), keep_on_top=True)
 
-                    if mw_event == '-MAIN-CLICKED-':
+                    elif mw_event == '-MAIN-CLICKED-':
                         sg.Window(
                             "Risk Score Guide",
                             [
@@ -106,19 +115,23 @@ def main():
                             keep_on_top=True
                         ).read(close=True) 
 
-                    if mw_event == '-TABLE-':
-                        selected_row_indices = mw_values['-TABLE-']
-                        print(selected_row_indices)
-                        if selected_row_indices:  
-                            selected_index = selected_row_indices[0]
-                            selected_row = data[selected_index]
-                            current_row = int(selected_row[0]) - 1
-                            app.update_risk_window(main_window, selected_row)
-                            app.risk_assessment_window(main_window, data, current_row)
-
-                    if mw_event in ('-HEADERICON-', 'HEADER'):
+                    elif mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()
                         break
+
+                    elif mw_event == '-TABLE-':
+                        selected_row_indices = mw_values['-TABLE-']
+                        print(selected_row_indices)
+                        if selected_row_indices:
+                            selected_index = selected_row_indices[0]
+                            page_data = app.get_page_data(data, current_page, rows_per_page)
+                            selected_row = page_data[selected_index]
+                            
+                            # Get actual index in full dataset if needed
+                            current_row = (current_page - 1) * rows_per_page + selected_index
+                            
+                            app.update_risk_window(main_window, selected_row)
+                            app.risk_assessment_window(main_window, data, current_row)
 
                     elif mw_event == '-NEXT-':
                         max_pages = (len(data) + rows_per_page - 1) // rows_per_page
@@ -133,21 +146,21 @@ def main():
                             main_window['-PAGENO-'].update(str(current_page))
 
                     # sorting buttons
-                    if mw_event == '-NUMBER-': # sort by ascending/descending
+                    elif mw_event == '-NUMBER-': # sort by ascending/descending
                         data.sort(key=lambda x: int(x[0]), reverse = reverse_flag)
                         reverse_flag = not reverse_flag
                         main_window['-TABLE-'].update(values=data)
-                    if mw_event == '-ALPHA-': # sort by alphabetical order
+                    elif mw_event == '-ALPHA-': # sort by alphabetical order
                         data.sort(key=lambda x: x[1], reverse = reverse_flag)
                         reverse_flag = not reverse_flag
                         main_window['-TABLE-'].update(values=data)
-                    if mw_event == '-PRICE-': # sort by current price
+                    elif mw_event == '-PRICE-': # sort by current price
                         data.sort(key=lambda x: float(x[2].replace(',', '')), reverse = reverse_flag)
                         reverse_flag = not reverse_flag 
                         main_window['-TABLE-'].update(values=data)
 
                     # search button
-                    if mw_event == '-SBUTTON-':
+                    elif mw_event == '-SBUTTON-':
                         user_search = mw_values['-SEARCHBAR-']
 
                         if user_search == '':
@@ -161,11 +174,11 @@ def main():
                             if sw_event == '-CBUTTON-':
                                 search_window.close()
 
-                            if user_search == '' or sw_event in (sg.WIN_CLOSED, 'Exit'):
+                            elif user_search == '' or sw_event in (sg.WIN_CLOSED, 'Exit'):
                                 search_window.close()
                                 break
 
-                            if isinstance(sw_event, str):
+                            elif isinstance(sw_event, str):
                                 match = pattern.match(sw_event)
                                 if match:
                                     current_row = int(key_to_data[sw_event][0]) - 1
@@ -175,7 +188,7 @@ def main():
                                     search_window.close()
                                     break
 
-                    if mw_event in (sg.WIN_CLOSED, 'Exit'):
+                    elif mw_event in (sg.WIN_CLOSED, 'Exit'):
                         print('closing now')
                         main_window.close()
                         break

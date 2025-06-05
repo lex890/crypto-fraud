@@ -202,3 +202,11 @@ def cg_get_historical_price(coin_id, date_str, currency):
         return data['market_data']['current_price'].get(currency, 'N/A')
     except Exception:
         return 'N/A'
+    
+def get_api_choice(imagepath):
+    api_choice = 'CoinMarketCap' if imagepath == './images/resizedCMC.png' else 'CoinGecko'
+    return api_choice 
+
+def get_cfg_key(imagepath):
+    cfg_key = 'CMCKEY' if imagepath == './images/resizedCMC.png' else 'CGKEY'
+    return cfg_key 
