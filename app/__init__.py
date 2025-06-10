@@ -7,4 +7,5 @@ from .get_images import *
 from .score_dict import *
 from .keystore import *
 from .loading import *
-from .table import *
+from .csv_handler import *
+from .score_assessment import *

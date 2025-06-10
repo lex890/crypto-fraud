@@ -4,10 +4,13 @@ from . import risk_assessment as rsk
 def get_page_data(data, page, rows_per_page):
     start = (page - 1) * rows_per_page
     end = start + rows_per_page
+    print('start: ', start, 'end: ', end)
     return data[start:end]
 
 
 def main_screen(headings, data, current_page, rows_per_page):
+    print('in the main: ', get_page_data(data, current_page, rows_per_page))
+    
     page_nav = [
         [
             
