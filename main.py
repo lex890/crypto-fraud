@@ -127,7 +127,7 @@ def main():
                             page_data = app.get_page_data(data, current_page, rows_per_page)
                             selected_row = page_data[selected_index]
                             
-                            # Get actual index in full dataset if needed
+                            # Get actual index in full dataset if neededa
                             current_row = (current_page - 1) * rows_per_page + selected_index
                             
                             app.update_risk_window(main_window, selected_row)
