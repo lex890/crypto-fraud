@@ -13,11 +13,10 @@ current_image = {
 }
 currency_choice = 'USD'
 
-
-
 def main():
     data = []
     current_page = 1
+    rows_per_page = 14
     login_window = app.login_screen()
     # Main event loop
     while True:
@@ -74,6 +73,7 @@ def main():
                 print(validity, api_choice, api_key)
 
                 login_window.hide()
+
                 '''
                 result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)    
 
@@ -86,9 +86,8 @@ def main():
 
                 filepath = './data/data.csv'
                 headings, data = app.read_csv(filepath)
-                
-                print(headings, data)
-                main_window = app.main_screen(headings, data)
+
+                main_window = app.main_screen(headings, data, current_page, rows_per_page)
                 print('Data fetched successfully')
                 reverse_flag = True
                 while True:
@@ -114,32 +113,36 @@ def main():
                             ],
                             modal=True,
                             keep_on_top=True
-                        ).read(close=True)
+                        ).read(close=True) 
 
                     elif mw_event in ('-HEADERICON-', 'HEADER'):
                         main_window.close()
-                        break 
+                        break
 
                     elif mw_event == '-TABLE-':
                         selected_row_indices = mw_values['-TABLE-']
                         print(selected_row_indices)
-                        if selected_row_indices:  
+                        if selected_row_indices:
                             selected_index = selected_row_indices[0]
-                            selected_row = data[selected_index]
-                            current_row = int(selected_row[0]) - 1
+                            page_data = app.get_page_data(data, current_page, rows_per_page)
+                            selected_row = page_data[selected_index]
+                            
+                            # Get actual index in full dataset if needed
+                            current_row = (current_page - 1) * rows_per_page + selected_index
+                            
                             app.update_risk_window(main_window, selected_row)
                             app.risk_assessment_window(main_window, data, current_row)
 
                     elif mw_event == '-NEXT-':
-                        max_pages = (round(len(data) / 14))
+                        max_pages = (len(data) + rows_per_page - 1) // rows_per_page
                         if current_page < max_pages:
                             current_page += 1
-                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page))
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
                             main_window['-PAGENO-'].update(str(current_page))
                     elif mw_event == '-PREV-':
                         if current_page > 1:
                             current_page -= 1
-                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page))
+                            main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
                             main_window['-PAGENO-'].update(str(current_page))
 
                     # sorting buttons
