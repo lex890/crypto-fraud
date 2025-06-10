@@ -74,6 +74,7 @@ def main():
 
                 login_window.hide()
 
+                # Uncomment the following lines to use the API request
                 '''
                 result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)    
 
@@ -84,6 +85,7 @@ def main():
                 headings, data, filepath = result         
                 '''
 
+                # For testing purposes, read from a local CSV file
                 filepath = './data/data.csv'
                 headings, data = app.read_csv(filepath)
 
