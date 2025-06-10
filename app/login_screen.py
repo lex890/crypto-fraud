@@ -17,7 +17,7 @@ def login_screen():
         [
             sg.Push(),
             sg.InputText(key='-API-', size=(40, 1), font=('Helvetica', 12), tooltip='Enter API Key', default_text='', pad=((20, 0), (0, 0))),
-            sg.Image(filename='./images/resizedCMC.png', size=(50, 50), enable_events=True, key='-CRYPTO-', tooltip='Select your API key provider.'),
+            sg.Image(filename='./images/resizedCMC.png', size=(50, 50), enable_events=True, key='-CRYPTO-LOGO-TOGGLE-', tooltip='Select your API key provider.'),
             sg.Image(filename='./images/tool-tip.png', size=(20, 20), enable_events=True, key='-HELP-', tooltip='What is an API Key?',
             pad=((0, 0), (0, 45))),
             sg.Push()
