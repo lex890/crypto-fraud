@@ -75,9 +75,9 @@ def handle_main_window_events(main_window, data, current_page, rows_per_page, fi
                 "Risk Score Guide",
                 [
                     [sg.Text("Score Interpretation", font=("Helvetica", 14, "bold"))],
-                    [sg.Text("1 - 3   : High-Risk/Fraudulent (Avoid)", text_color="red", font=("Helvetica", 10, "bold"))],
-                    [sg.Text("4 - 6   : Medium Risk (Caution)", text_color="orange", font=("Helvetica", 10, "bold"))],
-                    [sg.Text("7 - 10  : Trustworthy (Safe to interact with)", text_color="green", font=("Helvetica", 10, "bold"))],
+                    [sg.Text("1 - 3   : High-Risk/Fraudulent (Avoid)", text_color="red", font=("Calibri", 10, "bold"))],
+                    [sg.Text("4 - 6   : Medium Risk (Caution)", text_color="orange", font=("Calibri", 10, "bold"))],
+                    [sg.Text("7 - 10  : Trustworthy (Safe to interact with)", text_color="green", font=("Calibri", 10, "bold"))],
                     [sg.Button("OK", size=(10, 1))]
                 ],
                 modal=True,
