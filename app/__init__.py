@@ -9,3 +9,4 @@ from .keystore import *
 from .loading import *
 from .csv_handler import *
 from .score_assessment import *
+from .score_handler import *

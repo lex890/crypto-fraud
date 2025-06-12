@@ -4,6 +4,7 @@ from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import requests
 import time
 import FreeSimpleGUI as sg
+from . import score_handler as sch
 from . import csv_handler as tbl
 import json
 import csv
@@ -70,7 +71,8 @@ def api_request(api_key, api_choice, currency_choice):
                 source_code_list = coin_info.get('urls', {}).get('source_code', [])
                 source_code = source_code_list[0] if source_code_list else 'N/A'
                 time.sleep(1)  # Avoid rate limits
-                # coin market cap
+
+                #output is a list of dict [{...}, {...}, ...]
                 output.append({
                     # Table Information
                     '#': ranking,
@@ -89,13 +91,15 @@ def api_request(api_key, api_choice, currency_choice):
                     'Website': website,
                     'Source Code': source_code
                 })
+
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            filepath = f'./data/CG_crypto_extended_cg_{timestamp}.csv'
 
-            filename = f'./data/CMC_crypto_extended_{timestamp}.csv'
-            headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
-            print(type(data))
-
-            return headings, data, filename
+            tbl.export_to_csv(output, filepath) # this creates the csv
+            sch.get_scores(filepath)#scoring system
+            headings, data = tbl.read_csv(filepath) # initialize
+            
+            return headings, data, filepath
 
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             print('nuh uh')
@@ -169,13 +173,14 @@ def api_request(api_key, api_choice, currency_choice):
             })
 
             time.sleep(1)  # avoid rate limiting
-
         # Save to CSV
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f'./data/CG_crypto_extended_cg_{timestamp}.csv'
-        headings, data = tbl.read_csv(tbl.export_to_csv(output, filename))
-        print(headings, data, filename)
-        return headings, data, filename
+
+        filepath = f'./data/CG_crypto_extended_cg_{timestamp}.csv'
+        tbl.export_to_csv(output, filepath) # this creates the csv
+        headings, data = tbl.read_csv(filepath) # initialize headings and data from csv
+
+        return headings, data, filepath
 
 
 def is_valid_cmc_api_key(api_key):
@@ -225,10 +230,11 @@ def fetch_next_cryptocurrencies(offset, api_key, api_choice, currency_choice):
 
 def fetch_cmc_next_cryptocurrencies(api_key, offset, currency_choice):
     """Fetch next cryptocurrencies from CoinMarketCap"""
+    currency = currency_choice
     parameters = {
         'start': str(offset + 1),
         'limit': '14',
-        'convert': currency_choice
+        'convert': currency
     }
     headers = {
         'Accepts': 'application/json',
@@ -279,27 +285,26 @@ def fetch_cmc_next_cryptocurrencies(api_key, offset, currency_choice):
             source_code = source_code_list[0] if source_code_list else 'N/A'
             time.sleep(1)  # Avoid rate limits
 
-            output.append([
-                ranking,
-                name,
-                f"{price:,.2f}",
-                f"{volume_1h:,.2f}",
-                f"{volume_24h:,.2f}",
-                f"{volume_7d:,.2f}",
-                f"{float(market_cap):,.2f}",
-                logo,
-                symbol,
-                description,
-                date_added,
-                website,
-                source_code
-            ])
+            output.append({
+                # Table Information
+                '#': ranking,
+                'Name': name,
+                'Current Price ('+currency+')': f"{price:,.2f}",
+                '1h%': f"{volume_1h:,.2f}",
+                '24h%': f"{volume_24h:,.2f}",
+                '7d%': f"{volume_7d:,.2f}",
+                'Market Cap ('+currency+')': f"{float(market_cap):,.2f}",
 
-            
-        print('next 14: ', type(output))
-        
+                # Risk Assessment
+                'Logo': logo,
+                'Symbol': symbol,
+                'Description': description,
+                'Creation Date': date_added,
+                'Website': website,
+                'Source Code': source_code
+            })
+
         return output
-
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(f"Request failed: {e}")
         return []

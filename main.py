@@ -1,5 +1,6 @@
 import re
 import app
+import os
 import FreeSimpleGUI as sg
 
 sg.theme('LightGrey1')
@@ -108,15 +109,22 @@ def handle_main_window_events(main_window, data, current_page, rows_per_page, fi
                 # Fetch next set of cryptocurrencies
                 try:
                     current_page += 1
-                    new_data = app.fetch_next_cryptocurrencies(len(data), api_key, api_choice, currency_choice)
+                    new_data = app.next_screen_loading(data, api_key, api_choice, currency_choice)
+                    print('new_data: ', new_data)
                     if new_data:
-                        # Update the data list and table
-                        print('NEW_DATA: ', new_data)
-                        data.extend(new_data)
-                        print('APPENDED DATA: ', data)
+                        # creates new csv file with new data
+                        app.export_to_csv(new_data)
+                        #appends new data to main csv then deletes the created csv file
+                        _, new_data_list = app.read_csv('./data/temp.csv')
+                        app.append_csv(filepath, new_data_list)
+                        print('this is the current data: ', data)
+                        app.get_scores(filepath)
+
+                        _, data = app.read_csv(filepath)
                         main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
                         main_window['-PAGENO-'].update(str(current_page))
-                        sg.popup_auto_close('New cryptocurrencies loaded successfully!', auto_close_duration=2)
+
+                        os.remove('./data/temp.csv')  # Clean up temporary file
                     else:
                         sg.popup_auto_close('No more cryptocurrencies available.', auto_close_duration=2)
                 except Exception as e:
@@ -127,19 +135,22 @@ def handle_main_window_events(main_window, data, current_page, rows_per_page, fi
                 current_page -= 1
                 main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))
                 main_window['-PAGENO-'].update(str(current_page))
-
+                
         elif mw_event == '-NUMBER-':
             data.sort(key=lambda x: int(x[0]), reverse=reverse_flag)
             reverse_flag = not reverse_flag
             main_window['-TABLE-'].update(values=data)
+            main_window['-PAGENO-'].update('1')
         elif mw_event == '-ALPHA-':
             data.sort(key=lambda x: x[1], reverse=reverse_flag)
             reverse_flag = not reverse_flag
             main_window['-TABLE-'].update(values=data)
+            main_window['-PAGENO-'].update('1')
         elif mw_event == '-PRICE-':
             data.sort(key=lambda x: float(x[2].replace(',', '')), reverse=reverse_flag)
             reverse_flag = not reverse_flag
             main_window['-TABLE-'].update(values=data)
+            main_window['-PAGENO-'].update('1')
 
         elif mw_event == '-SBUTTON-':
             user_search = mw_values['-SEARCHBAR-']
@@ -179,6 +190,7 @@ def main():
         print(lw_event, lw_values)
 
         if lw_event in (sg.WIN_CLOSED, 'Exit'):
+            
             break
         elif lw_event == '-CRYPTO-LOGO-TOGGLE-':
             handle_crypto_toggle(login_window)
@@ -191,7 +203,7 @@ def main():
         elif lw_event == 'Confirm':
             success, api_key, api_choice, currency_choice = handle_confirm(login_window, lw_values)
             if success:
-                result = app.run_with_loading(app.api_request, api_key, api_choice, currency_choice)    
+                result = app.login_loading(api_key, api_choice, currency_choice)    
 
                 if not result or not isinstance(result, tuple) or len(result) != 3:
                     sg.popup("Unexpected API response. Please try again.")
