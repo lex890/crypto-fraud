@@ -1,5 +1,3 @@
-import csv
-import random
 import requests
 import pandas as pd
 from datetime import datetime
@@ -7,26 +5,31 @@ import time
 import configparser
 import os
 
-score_header = [
-    "Trading Volume Consistency",
-    "Liquidity & Order Book Depth",
-    "Token Age & Market History",
-    "Developer & Team Transparency",
-    "Smart Contract Audit & Security",
-    "Exchange Listings & Reputation",
-    "Community & Social Media Presence",
-    "Transaction Patterns & Anomalies",
-    "Whitepaper & Roadmap Execution",
-    "Regulatory Compliance & Legal Standing"
-]
+# Load API key from config file
+def load_api_key(config_path='./keys/settings.cfg', key_name='cmckey'):
+    config = configparser.ConfigParser()
+    if os.path.exists(config_path):
+        config.read(config_path)
+        return config.get('CoinMarketCap', key_name, fallback='')
+    return ''
 
-GITHUB_TOKEN = None
-BITQUERY_API_KEY = 'ory_at_VHgEV5HL8Q310nA0oyK3Biwcy-44I1e7N4Tg2uXxYg0.tmtNPoS41mkqEhJ0k-kw6nDoiG34iex34ROwJk-_02c' 
+API_KEY = load_api_key()
+headers = {
+    'Accepts': 'application/json',
+    'X-CMC_PRO_API_KEY': API_KEY,
+}
 
+
+# GitHub token if available (for better rate limits)
+GITHUB_TOKEN = None  # Replace with your token or load from file/env
+
+BITQUERY_API_KEY = 'ory_at_VHgEV5HL8Q310nA0oyK3Biwcy-44I1e7N4Tg2uXxYg0.tmtNPoS41mkqEhJ0k-kw6nDoiG34iex34ROwJk-_02c'
+
+# Define scoring functions
 def score_trading_volume_consistency(volume_24h, market_cap):
     if not market_cap:
         return 1
-    ratio = float(str(volume_24h).replace(',', '')) / float(str(market_cap).replace(',', ''))
+    ratio = volume_24h / market_cap
     if ratio >= 0.5:
         return 10
     elif ratio >= 0.25:
@@ -38,7 +41,6 @@ def score_trading_volume_consistency(volume_24h, market_cap):
     return 2
 
 def score_market_cap_liquidity(market_cap):
-    market_cap = float(str(market_cap).replace(',', ''))
     if market_cap >= 10_000_000_000:
         return 10
     elif market_cap >= 1_000_000_000:
@@ -216,53 +218,40 @@ def score_regulatory_compliance(symbol):
     except:
         return 3
 
-def evaluate_cryptos(cryptos, currency_choice):
+def fetch_crypto_data():
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+    parameters = {
+        'start': '1',
+        'limit': '14',
+        'convert': 'USD'
+    }
+    response = requests.get(url, headers=headers, params=parameters)
+    return response.json().get('data', [])
+
+def evaluate_cryptos(cryptos):
     results = []
     for coin in cryptos:
-        
-        rank_number = coin.get('#')
-        crypto_name = coin.get('Name') 
-        print('retrieved: ', crypto_name)
-        current_price = coin.get(f'Current Price ('+currency_choice+')')
-        volume_1h = coin.get('1h%')
-        volume_24h = coin.get('24h%')
-        volume_7d = coin.get('7d%')
-        market_cap = coin.get(f'Market Cap ('+currency_choice+')')
-        logo_link = coin.get('Logo')
-        symbol = coin.get('Symbol')
-        description = coin.get('Description')
-        creation_date = coin.get('Creation Date')
-        website = coin.get('Website')
-        source_code = coin.get('Source Code')
+        name = coin.get('name')
+        symbol = coin.get('symbol')
+        quote = coin.get('quote', {}).get('USD', {})
+        market_cap = quote.get('market_cap', 0)
+        volume_24h = quote.get('volume_24h', 0)
+        date_added = coin.get('date_added', '')
 
-        score_volume = 10 if crypto_name == 'Bitcoin' else score_trading_volume_consistency(volume_24h, market_cap)
-        score_liquidity = 10 if crypto_name == 'Bitcoin' else score_market_cap_liquidity(market_cap)
-        score_age = 10 if crypto_name == 'Bitcoin' else score_token_age(creation_date)
-        score_dev = 10 if crypto_name == 'Bitcoin' else score_developer_transparency(symbol)
-        score_audit = 10 if crypto_name == 'Bitcoin' else score_contract_audit(symbol)
-        score_exchange = 10 if crypto_name == 'Bitcoin' else score_exchange_listings(symbol)
-        score_social = 10 if crypto_name == 'Bitcoin' else score_social_media_presence(symbol)
-        score_txn = 10 if crypto_name == 'Bitcoin' else score_transaction_patterns(symbol)
-        score_whitepaper = 10 if crypto_name == 'Bitcoin' else score_whitepaper_roadmap(symbol)
-        score_regulation = 10 if crypto_name == 'Bitcoin' else score_regulatory_compliance(symbol)
+        score_volume = score_trading_volume_consistency(volume_24h, market_cap)
+        score_liquidity = score_market_cap_liquidity(market_cap)
+        score_age = score_token_age(date_added)
+        score_dev = score_developer_transparency(symbol)
+        score_audit = score_contract_audit(symbol)
+        score_exchange = score_exchange_listings(symbol)
+        score_social = score_social_media_presence(symbol)
+        score_txn = score_transaction_patterns(symbol)
+        score_whitepaper = score_whitepaper_roadmap(symbol)
+        score_regulation = score_regulatory_compliance(symbol)
 
         scores = {
-            # Table Information
-            '#': rank_number,
-            'Name': crypto_name,
-            'Current Price ('+currency_choice+')': current_price,
-            '1h%': volume_1h,
-            '24h%': volume_24h,
-            '7d%': volume_7d,
-            'Market Cap ('+currency_choice+')': market_cap,
-            # Risk Assessment
-            'Logo': logo_link,
+            'Name': name,
             'Symbol': symbol,
-            'Description': description,
-            'Creation Date': creation_date,
-            'Website': website,
-            'Source Code': source_code,
-            # Scoring
             'Trading Volume Consistency': score_volume,
             'Liquidity and Order Book Depth': score_liquidity,
             'Token Age and Market History': score_age,
@@ -279,3 +268,23 @@ def evaluate_cryptos(cryptos, currency_choice):
         results.append(scores)
         time.sleep(1)  # To prevent rate limit issues with public APIs
     return results
+
+def save_scores_to_csv(results):
+    df = pd.DataFrame(results)
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = f"crypto_scores_{timestamp}.csv"
+    df.to_csv(filename, index=False)
+    print(f"Saved results to {filename}")
+
+# Main logic
+if __name__ == '__main__':
+    #raw data
+    crypto_data = fetch_crypto_data()
+
+    # data with socres
+    scores = evaluate_cryptos(crypto_data)
+    
+    save_scores_to_csv(scores)
+
+    print('fetch_crypto_data: ', crypto_data)
+    print('evaluate_cryptos: ', scores)

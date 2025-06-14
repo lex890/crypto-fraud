@@ -118,7 +118,6 @@ def handle_main_window_events(main_window, data, current_page, rows_per_page, fi
                         _, new_data_list = app.read_csv('./data/temp.csv')
                         app.append_csv(filepath, new_data_list)
                         print('this is the current data: ', data)
-                        app.get_scores(filepath)
 
                         _, data = app.read_csv(filepath)
                         main_window['-TABLE-'].update(values=app.get_page_data(data, current_page, rows_per_page))

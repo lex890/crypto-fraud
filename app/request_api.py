@@ -89,7 +89,6 @@ def api_request_cmc(api_key, currency_choice):
                 '24h%': f"{volume_24h:,.2f}",
                 '7d%': f"{volume_7d:,.2f}",
                 'Market Cap ('+currency_choice+')': f"{float(market_cap):,.2f}",
-
                 # Risk Assessment
                 'Logo': logo,
                 'Symbol': symbol,
@@ -98,12 +97,12 @@ def api_request_cmc(api_key, currency_choice):
                 'Website': website,
                 'Source Code': source_code
             })
-
+        output_with_scores = sch.evaluate_cryptos(output, currency_choice)
+        print('output_with_scores: ', output_with_scores)
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         filepath = f'./data/CG_crypto_extended_cg_{timestamp}.csv'
 
-        tbl.export_to_csv(output, filepath) # this creates the csv
-        sch.get_scores(filepath)#scoring system
+        tbl.export_to_csv(output_with_scores, filepath) # this creates the csv
         headings, data = tbl.read_csv(filepath) # initialize
         
         return headings, data, filepath
@@ -116,6 +115,8 @@ def api_request_cmc(api_key, currency_choice):
         import traceback
         traceback.print_exc()
         return sg.popup(f"Response missing key: {ke}")
+    
+
 
 def api_request_cg(api_key, currency_choice):
     apicheck = f'https://pro-api.coingecko.com/api/v3/ping?x_cg_pro_api_key={api_key}'
@@ -310,7 +311,8 @@ def fetch_cmc_next_cryptocurrencies(api_key, offset, currency_choice):
                 'Source Code': source_code
             })
 
-        return output
+        output_with_scores = sch.evaluate_cryptos(output, currency_choice)
+        return output_with_scores
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(f"Request failed: {e}")
         return []
